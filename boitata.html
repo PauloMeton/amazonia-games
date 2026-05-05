@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boitatá Fire Fixed</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#061a14;
+  color:white;
+  overflow:hidden;
+}
+
+header{
+  background:#14532d;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+#game{
+  position:relative;
+  width:100vw;
+  height:100vh;
+}
+
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+  background:#020617;
+}
+
+.hud{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,0.5);
+  padding:10px;
+  border-radius:10px;
+  z-index:10;
+}
+
+.controls{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:none;
+  gap:10px;
+}
+
+.controls button{
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-size:16px;
+}
+
+@media(max-width:768px){
+  .controls{display:flex;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🔥 Boitatá Fire</h1>
+  <div>Destrua e sobreviva</div>
+</header>
+
+<div id="game">
+
+  <div class="hud">
+    🏆 Pontos: <span id="pontos">0</span>
+  </div>
+
+  <canvas id="c"></canvas>
+
+  <div class="controls">
+    <button onclick="move('up')">⬆️</button>
+    <button onclick="move('left')">⬅️</button>
+    <button onclick="move('down')">⬇️</button>
+    <button onclick="move('right')">➡️</button>
+    <button onclick="fire()">🔥</button>
+  </div>
+
+</div>
+
+<script>
+const c=document.getElementById("c");
+const ctx=c.getContext("2d");
+
+let w,h;
+function resize(){
+  w=window.innerWidth;
+  h=window.innerHeight;
+  c.width=w;
+  c.height=h;
+}
+window.addEventListener("resize",resize);
+resize();
+
+// PLAYER
+let boi={x:200,y:200,s:25,speed:6};
+
+// ENTIDADES
+let inimigos=[];
+let obstaculos=[];
+let tiros=[];
+
+let pontos=0;
+
+// INPUT
+window.addEventListener("keydown",(e)=>{
+  control(e.key);
+  if(e.key===" "){
+    fire();
+  }
+});
+
+// CONTROLES
+function move(dir){
+  control(dir);
+}
+
+function control(key){
+  if(key==="ArrowUp"||key==="up") boi.y-=boi.speed;
+  if(key==="ArrowDown"||key==="down") boi.y+=boi.speed;
+  if(key==="ArrowLeft"||key==="left") boi.x-=boi.speed;
+  if(key==="ArrowRight"||key==="right") boi.x+=boi.speed;
+}
+
+// 🔥 TIRO
+function fire(){
+  tiros.push({
+    x:boi.x,
+    y:boi.y,
+    vx:8,
+    vy:0
+  });
+}
+
+// SPAWN
+setInterval(()=>{
+  inimigos.push({x:Math.random()*w,y:Math.random()*h,s:20});
+},1500);
+
+setInterval(()=>{
+  obstaculos.push({x:Math.random()*w,y:Math.random()*h,s:40});
+},2500);
+
+// DISTÂNCIA
+function dist(a,b){
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+
+// UPDATE (FIX PRINCIPAL)
+function update(){
+
+  // TIROS (CORRIGIDO)
+  for(let ti=tiros.length-1; ti>=0; ti--){
+    let t = tiros[ti];
+    t.x += t.vx;
+
+    // remove fora da tela
+    if(t.x > w){
+      tiros.splice(ti,1);
+      continue;
+    }
+
+    // colisão com obstáculos
+    for(let oi=obstaculos.length-1; oi>=0; oi--){
+      let o = obstaculos[oi];
+
+      if(dist(t,o) < 25){
+        obstaculos.splice(oi,1); // destrói obstáculo
+        tiros.splice(ti,1);      // destrói tiro
+        break;
+      }
+    }
+  }
+
+  // INIMIGOS
+  for(let ii=inimigos.length-1; ii>=0; ii--){
+    let i = inimigos[ii];
+
+    if(dist(boi,i) < 25){
+      inimigos.splice(ii,1);
+      pontos++;
+      document.getElementById("pontos").innerText=pontos;
+    }
+  }
+
+  // COLISÃO PLAYER
+  for(let oi=0; oi<obstaculos.length; oi++){
+    let o = obstaculos[oi];
+
+    if(dist(boi,o) < 30){
+      alert("💀 Você bateu em um obstáculo!");
+      location.reload();
+    }
+  }
+}
+
+// DRAW
+function draw(){
+  ctx.clearRect(0,0,w,h);
+
+  // BOITATÁ
+  ctx.fillStyle="orange";
+  ctx.beginPath();
+  ctx.arc(boi.x,boi.y,boi.s,0,Math.PI*2);
+  ctx.fill();
+
+  // INIMIGOS
+  ctx.fillStyle="green";
+  inimigos.forEach(i=>{
+    ctx.beginPath();
+    ctx.arc(i.x,i.y,i.s,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // OBSTÁCULOS
+  ctx.fillStyle="#8B4513";
+  obstaculos.forEach(o=>{
+    ctx.fillRect(o.x,o.y,o.s,o.s);
+  });
+
+  // TIROS
+  ctx.fillStyle="red";
+  tiros.forEach(t=>{
+    ctx.beginPath();
+    ctx.arc(t.x,t.y,8,0,Math.PI*2);
+    ctx.fill();
+  });
+}
+
+// LOOP
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>

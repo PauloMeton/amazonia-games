@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazônia Games - Saci</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b1d1a;
+  color:white;
+  overflow:hidden;
+}
+
+/* MENU */
+header{
+  background:#14532d;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.container{
+  padding:20px;
+}
+
+.card{
+  background:#112e2b;
+  padding:20px;
+  border-radius:15px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  background:#14532d;
+}
+
+.btn{
+  margin-top:10px;
+  padding:8px 12px;
+  background:#22c55e;
+  border-radius:8px;
+  display:inline-block;
+}
+
+/* GAME */
+#game{
+  display:none;
+}
+
+canvas{
+  width:100vw;
+  height:100vh;
+  background:#020617;
+  display:block;
+}
+
+.ui{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,0.5);
+  padding:10px;
+  border-radius:10px;
+  z-index:10;
+}
+
+.powers{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  z-index:10;
+}
+
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<header>
+  <h1>🌿 Amazônia Games</h1>
+</header>
+
+<div id="menu" class="container">
+  <div class="card" onclick="start()">
+    <h2>🌪️ Saci Poderes</h2>
+    <p>Use habilidades para sobreviver ao caçador.</p>
+    <div class="btn">Jogar</div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+
+  <div class="ui">
+    🌪️ Saci em jogo
+  </div>
+
+  <div class="powers">
+    <button onclick="vento()">🌪️ Vento</button>
+    <button onclick="teleporte()">🌀 Teleporte</button>
+    <button onclick="redemoinho()">💨 Redemoinho</button>
+  </div>
+
+  <canvas id="c"></canvas>
+</div>
+
+<script>
+const c=document.getElementById("c");
+const ctx=c.getContext("2d");
+
+let w,h;
+function resize(){
+  w=window.innerWidth;
+  h=window.innerHeight;
+  c.width=w;
+  c.height=h;
+}
+resize();
+
+// ESTADO
+let saci={x:300,y:300,s:25,vx:0,vy:0};
+let inimigo={x:100,y:100};
+let tiros=[];
+let redemoinhoAtivo=false;
+
+// TIMER DE TIRO (6 SEGUNDOS ≈ 360 FRAMES)
+let tiroTimer=0;
+
+// MENU
+function start(){
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
+  loop();
+}
+
+// CONTROLES SACI
+window.addEventListener("keydown",(e)=>{
+  if(e.key=="ArrowUp")saci.y-=6;
+  if(e.key=="ArrowDown")saci.y+=6;
+  if(e.key=="ArrowLeft")saci.x-=6;
+  if(e.key=="ArrowRight")saci.x+=6;
+
+  if(e.key=="q")vento();
+  if(e.key=="w")teleporte();
+  if(e.key=="e")redemoinho();
+});
+
+// 🌪️ VENTO
+function vento(){
+  let dx=inimigo.x-saci.x;
+  let dy=inimigo.y-saci.y;
+  let d=Math.sqrt(dx*dx+dy*dy);
+
+  if(d<250){
+    inimigo.x+=dx*-0.6;
+    inimigo.y+=dy*-0.6;
+  }
+
+  tiros.forEach(t=>{
+    t.vx += (t.x-saci.x)*0.02;
+    t.vy += (t.y-saci.y)*0.02;
+  });
+}
+
+// 🌀 TELEPORTE
+function teleporte(){
+  saci.x=Math.random()*w;
+  saci.y=Math.random()*h;
+}
+
+// 💨 REDEMOINHO
+function redemoinho(){
+  redemoinhoAtivo=true;
+  setTimeout(()=>redemoinhoAtivo=false,3000);
+}
+
+// ATIRAR (CAÇADOR)
+function atirar(){
+  let dx=saci.x-inimigo.x;
+  let dy=saci.y-inimigo.y;
+  let d=Math.sqrt(dx*dx+dy*dy);
+
+  tiros.push({
+    x:inimigo.x,
+    y:inimigo.y,
+    vx:dx/d*5,
+    vy:dy/d*5
+  });
+}
+
+// UPDATE INIMIGO
+function updateEnemy(){
+  inimigo.x += (saci.x-inimigo.x)*0.01;
+  inimigo.y += (saci.y-inimigo.y)*0.01;
+
+  // ⏱️ TIRO A CADA 6 SEGUNDOS
+  tiroTimer++;
+  if(tiroTimer>=360){
+    atirar();
+    tiroTimer=0;
+  }
+}
+
+// TIROS
+function updateTiros(){
+  tiros.forEach(t=>{
+
+    // redemoinho puxa tiro
+    if(redemoinhoAtivo){
+      let dx=t.x-saci.x;
+      let dy=t.y-saci.y;
+      t.vx+=dx*-0.02;
+      t.vy+=dy*-0.02;
+    }
+
+    t.x+=t.vx;
+    t.y+=t.vy;
+  });
+}
+
+// COLISÃO
+function colisao(){
+  tiros.forEach(t=>{
+    let dx=t.x-saci.x;
+    let dy=t.y-saci.y;
+    let d=Math.sqrt(dx*dx+dy*dy);
+
+    if(d<20){
+      alert("💀 Você foi capturado!");
+      location.reload();
+    }
+  });
+}
+
+// DESENHO
+function draw(){
+  ctx.clearRect(0,0,w,h);
+
+  // SACI
+  ctx.fillStyle="red";
+  ctx.fillRect(saci.x,saci.y,saci.s,saci.s);
+
+  // INIMIGO
+  ctx.fillStyle="blue";
+  ctx.fillRect(inimigo.x,inimigo.y,30,30);
+
+  // TIROS
+  ctx.fillStyle="yellow";
+  tiros.forEach(t=>{
+    ctx.fillRect(t.x,t.y,5,5);
+  });
+
+  // REDEMOINHO
+  if(redemoinhoAtivo){
+    ctx.beginPath();
+    ctx.arc(saci.x,saci.y,60,0,Math.PI*2);
+    ctx.strokeStyle="rgba(0,255,255,0.3)";
+    ctx.stroke();
+  }
+}
+
+// LOOP
+function loop(){
+  updateEnemy();
+  updateTiros();
+  colisao();
+  draw();
+
+  requestAnimationFrame(loop);
+}
+</script>
+
+</body>
+</html>

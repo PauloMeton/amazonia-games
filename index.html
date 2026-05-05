@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma Amazônica</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial;
+  background:#0b1d1a;
+  color:white;
+}
+
+/* HEADER */
+header{
+  background:#14532d;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+header h1{
+  margin:0;
+  font-size:20px;
+}
+
+.user{
+  font-size:14px;
+  opacity:0.8;
+}
+
+/* CONTAINER */
+.container{
+  padding:20px;
+}
+
+/* DESTAQUE */
+.destaque{
+  background:linear-gradient(90deg,#16a34a,#22c55e);
+  padding:20px;
+  border-radius:15px;
+  margin-bottom:20px;
+}
+
+/* GRID RESPONSIVO */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+  gap:15px;
+}
+
+/* CARD */
+.card{
+  background:#112e2b;
+  border-radius:15px;
+  padding:15px;
+  transition:0.3s;
+  cursor:pointer;
+  position:relative;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  background:#14532d;
+}
+
+.tag{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:#22c55e;
+  padding:4px 8px;
+  border-radius:10px;
+  font-size:11px;
+}
+
+.card h3{
+  margin-top:25px;
+  font-size:18px;
+}
+
+.card p{
+  font-size:13px;
+  opacity:0.8;
+}
+
+/* BOTÃO */
+.btn{
+  margin-top:12px;
+  display:inline-block;
+  padding:8px 12px;
+  background:#22c55e;
+  border-radius:8px;
+  font-size:14px;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:15px;
+  opacity:0.5;
+  font-size:12px;
+}
+
+/* 📱 MOBILE */
+@media (max-width:600px){
+
+  header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  header h1{
+    font-size:18px;
+  }
+
+  .container{
+    padding:15px;
+  }
+
+  .destaque{
+    font-size:14px;
+  }
+
+  .card{
+    padding:18px;
+  }
+
+  .btn{
+    width:100%;
+    text-align:center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌿 Amazônia Games</h1>
+  <div class="user">Jogador</div>
+</header>
+
+<div class="container">
+
+  <div class="destaque">
+    <h2>🔥 Jogo em destaque: Boitatá</h2>
+    <p>Desvie do fogo e sobreviva o máximo possível!</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="card" onclick="ir('boitata')">
+      <div class="tag">Fácil</div>
+      <h3>🔥 Boitatá</h3>
+      <p>Controle a cobra de fogo e evite colidir.</p>
+      <div class="btn">Jogar</div>
+    </div>
+
+    <div class="card" onclick="ir('saci')">
+      <div class="tag">Médio</div>
+      <h3>🌪️ Saci</h3>
+      <p>Pegue o saci antes que ele desapareça.</p>
+      <div class="btn">Jogar</div>
+    </div>
+
+    <div class="card" onclick="ir('iara')">
+      <div class="tag">Difícil</div>
+      <h3>🌊 Iara</h3>
+      <p>Evite cair no canto da sereia.</p>
+      <div class="btn">Jogar</div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>Projeto Amazônico 🌱</footer>
+
+<script>
+function ir(jogo){
+  window.location.href = jogo + ".html";
+}
+</script>
+
+</body>
+</html>

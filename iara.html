@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Iara Rhythm</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(#020617,#0ea5e9);
+  color:white;
+  text-align:center;
+}
+
+.tela{
+  position:absolute;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.iara-img{
+  width:220px;
+  margin:20px;
+  filter:drop-shadow(0 0 20px cyan);
+  border-radius:12px;
+}
+
+.historia{
+  max-width:500px;
+  background:rgba(0,0,0,0.5);
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 0 15px cyan;
+}
+
+button{
+  padding:15px 30px;
+  border:none;
+  border-radius:10px;
+  background:#0ea5e9;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+  margin-top:20px;
+}
+
+.hud{
+  margin:10px;
+  font-size:22px;
+  color:cyan;
+}
+
+canvas{
+  background:linear-gradient(#022c43,#0ea5e9);
+  border-radius:10px;
+}
+
+.feedback{
+  position:absolute;
+  top:40%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:40px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<div id="menu" class="tela">
+  <h1>🌊 Lenda da Iara</h1>
+
+  <img src="img/iara.png" class="iara-img">
+
+  <div class="historia">
+    Iara é uma sereia das águas da Amazônia.
+    Diz a lenda que ela encanta pescadores com sua beleza e seu canto,
+    fazendo com que eles mergulhem no rio e nunca mais voltem.
+    Você consegue resistir ao seu ritmo?
+  </div>
+
+  <button onclick="start()">Começar</button>
+</div>
+
+<!-- JOGO -->
+<div id="game" style="display:none;">
+  <div class="hud">Pontuação: <span id="score">0</span></div>
+  <canvas id="canvas" width="400" height="400"></canvas>
+</div>
+
+<div id="feedback" class="feedback"></div>
+
+<script>
+// 🎵 MÚSICA
+let audio = new Audio("ate-que-durou-ao-vivo.mp3");
+audio.volume = 0.5;
+
+// 🎮 JOGO
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+let notes = [];
+let score = 0;
+let lanes = [80,160,240,320];
+
+function start(){
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
+
+  notes = [];
+  score = 0;
+
+  audio.currentTime = 0;
+  audio.play(); // 🎵 TOCA A MÚSICA
+
+  setInterval(spawn,700);
+  draw();
+}
+
+function spawn(){
+  let lane = lanes[Math.floor(Math.random()*4)];
+  notes.push({x: lane, y: 0});
+}
+
+function draw(){
+  ctx.fillStyle="rgba(0,50,80,0.3)";
+  ctx.fillRect(0,0,400,400);
+
+  ctx.fillStyle="white";
+  ctx.fillRect(0,340,400,5);
+
+  ctx.font="30px Arial";
+  ctx.fillText("⬅️",60,380);
+  ctx.fillText("⬇️",140,380);
+  ctx.fillText("⬆️",220,380);
+  ctx.fillText("➡️",300,380);
+
+  ctx.fillStyle="cyan";
+
+  notes.forEach((n,i)=>{
+    n.y += 6;
+    ctx.fillRect(n.x-20,n.y,40,20);
+
+    if(n.y>400){
+      notes.splice(i,1);
+      show("MISS","red");
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+
+function show(text,color){
+  let fb = document.getElementById("feedback");
+  fb.innerText = text;
+  fb.style.color = color;
+  setTimeout(()=>fb.innerText="",300);
+}
+
+document.addEventListener("keydown", e=>{
+  let map = {
+    ArrowLeft:0,
+    ArrowDown:1,
+    ArrowUp:2,
+    ArrowRight:3
+  };
+
+  let i = map[e.key];
+  if(i===undefined) return;
+
+  let target = lanes[i];
+
+  notes.forEach((n,index)=>{
+    if(Math.abs(n.x-target)<10){
+
+      if(n.y>320 && n.y<360){
+        score+=100;
+        show("PERFECT","cyan");
+      } else if(n.y>280){
+        score+=50;
+        show("GOOD","white");
+      } else{
+        show("MISS","red");
+      }
+
+      notes.splice(index,1);
+    }
+  });
+
+  document.getElementById("score").innerText = score;
+});
+</script>
+
+</body>
+</html>
