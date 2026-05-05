@@ -2,114 +2,365 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amazônia Games - Saci</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Lenda do Saci</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --vermelho:#dc2626;
+  --vermelho-claro:#fca5a5;
+  --dourado:#facc15;
+  --dourado-claro:#fef08a;
+}
+
 body{
-  margin:0;
-  font-family:Arial;
-  background:#0b1d1a;
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(ellipse at 20% 10%,rgba(250,204,21,0.15),transparent 60%),
+    radial-gradient(ellipse at 80% 90%,rgba(220,38,38,0.25),transparent 60%),
+    linear-gradient(180deg,#0a1f1c 0%,#1a0f08 60%,#3f1d10 100%);
   color:white;
+  text-align:center;
+  min-height:100vh;
+  overflow-x:hidden;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* VAGALUMES / FAÍSCAS */
+.fireflies{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
   overflow:hidden;
 }
 
-/* MENU */
-header{
-  background:#14532d;
-  padding:15px;
+.firefly{
+  position:absolute;
+  width:6px;
+  height:6px;
+  background:radial-gradient(circle,#fef08a,#facc15 60%,transparent 80%);
+  border-radius:50%;
+  filter:blur(0.5px);
+  animation:firefly linear infinite;
+  box-shadow:0 0 12px #facc15;
+}
+
+@keyframes firefly{
+  0%{ transform:translate(0,0); opacity:0; }
+  10%{ opacity:1; }
+  50%{ transform:translate(80px,-120px); opacity:0.8; }
+  90%{ opacity:0.5; }
+  100%{ transform:translate(-50px,-300px); opacity:0; }
+}
+
+/* MENU / LENDA */
+.tela{
+  position:relative;
+  z-index:5;
+  width:100%;
+  min-height:100vh;
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:60px 20px 40px;
+  animation:fadeIn 0.8s ease;
 }
 
-.container{
-  padding:20px;
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(20px); }
+  to{ opacity:1; transform:translateY(0); }
 }
 
-.card{
-  background:#112e2b;
-  padding:20px;
-  border-radius:15px;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:translateY(-5px);
-  background:#14532d;
-}
-
-.btn{
-  margin-top:10px;
-  padding:8px 12px;
-  background:#22c55e;
-  border-radius:8px;
+.badge{
   display:inline-block;
+  padding:6px 18px;
+  background:rgba(250,204,21,0.12);
+  border:1px solid rgba(250,204,21,0.5);
+  border-radius:20px;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--dourado);
+  margin-bottom:18px;
+  text-transform:uppercase;
+}
+
+h1.titulo{
+  font-family:'Cinzel',serif;
+  font-size:clamp(34px,6vw,52px);
+  font-weight:700;
+  letter-spacing:2px;
+  margin-bottom:30px;
+  background:linear-gradient(90deg,#fef08a,#facc15,#fca5a5);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 25px rgba(250,204,21,0.5));
+}
+
+.saci-img{
+  width:240px;
+  max-width:60vw;
+  margin:10px;
+  border-radius:16px;
+  filter:drop-shadow(0 0 30px rgba(250,204,21,0.6));
+  animation:floatImg 4s ease-in-out infinite;
+  border:2px solid rgba(250,204,21,0.4);
+}
+
+@keyframes floatImg{
+  0%,100%{ transform:translateY(0) rotate(-1deg); }
+  50%{ transform:translateY(-12px) rotate(1deg); }
+}
+
+.historia{
+  max-width:520px;
+  margin:30px auto 10px;
+  background:rgba(20,10,5,0.6);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  padding:24px 28px;
+  border-radius:18px;
+  border:1px solid rgba(250,204,21,0.3);
+  box-shadow:0 0 40px rgba(250,204,21,0.2),inset 0 0 20px rgba(250,204,21,0.05);
+  font-size:15px;
+  line-height:1.7;
+  color:#fef9c3;
+  font-weight:300;
+}
+
+.historia::before{
+  content:"❝";
+  display:block;
+  font-family:'Cinzel',serif;
+  font-size:48px;
+  color:var(--dourado);
+  line-height:0.4;
+  margin-bottom:8px;
+  opacity:0.6;
+}
+
+.btn-comecar{
+  margin-top:30px;
+  padding:16px 40px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(90deg,var(--vermelho),#f97316);
+  color:white;
+  font-size:16px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  letter-spacing:1px;
+  cursor:pointer;
+  text-transform:uppercase;
+  box-shadow:0 8px 30px -8px rgba(220,38,38,0.7);
+  transition:all 0.3s;
+}
+
+.btn-comecar:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px -8px rgba(220,38,38,0.9);
+}
+
+.voltar{
+  position:fixed;
+  top:16px;
+  left:16px;
+  padding:10px 16px;
+  background:rgba(20,10,5,0.7);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(250,204,21,0.4);
+  color:var(--dourado-claro);
+  border-radius:12px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:500;
+  z-index:50;
+  font-family:'Inter',sans-serif;
+  transition:all 0.3s;
+}
+
+.voltar:hover{
+  background:rgba(250,204,21,0.2);
+  color:white;
 }
 
 /* GAME */
 #game{
   display:none;
+  position:relative;
 }
 
 canvas{
   width:100vw;
   height:100vh;
-  background:#020617;
+  background:radial-gradient(ellipse at center,#1a0f08,#020617);
   display:block;
+  touch-action:none;
 }
 
 .ui{
   position:absolute;
-  top:10px;
-  left:10px;
-  background:rgba(0,0,0,0.5);
-  padding:10px;
-  border-radius:10px;
+  top:16px;
+  left:130px;
+  background:rgba(20,10,5,0.7);
+  backdrop-filter:blur(10px);
+  padding:10px 18px;
+  border-radius:30px;
   z-index:10;
+  font-family:'Cinzel',serif;
+  font-size:14px;
+  letter-spacing:2px;
+  color:var(--dourado-claro);
+  border:1px solid rgba(250,204,21,0.3);
 }
 
 .powers{
   position:absolute;
-  bottom:10px;
+  bottom:20px;
   left:50%;
   transform:translateX(-50%);
   display:flex;
   gap:10px;
   z-index:10;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
-button{
-  padding:10px;
+.powers button{
+  padding:12px 18px;
   border:none;
-  border-radius:8px;
-  background:#22c55e;
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(220,38,38,0.85),rgba(249,115,22,0.85));
+  backdrop-filter:blur(8px);
   color:white;
   cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.5px;
+  border:1px solid rgba(250,204,21,0.3);
+  box-shadow:0 4px 20px -5px rgba(220,38,38,0.5);
+  transition:transform 0.15s;
 }
+.powers button:active{ transform:scale(0.95); }
+
+/* DPAD */
+.dpad{
+  position:absolute;
+  bottom:90px;
+  left:20px;
+  display:grid;
+  grid-template-columns:60px 60px 60px;
+  grid-template-rows:60px 60px 60px;
+  gap:6px;
+  z-index:10;
+}
+
+.dpad button{
+  width:60px;
+  height:60px;
+  font-size:22px;
+  background:rgba(220,38,38,0.6);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(250,204,21,0.3);
+  border-radius:14px;
+  color:white;
+  transition:transform 0.1s;
+}
+.dpad button:active{ background:#dc2626; transform:scale(0.92); }
+.dpad .up{ grid-column:2; grid-row:1; }
+.dpad .left{ grid-column:1; grid-row:2; }
+.dpad .right{ grid-column:3; grid-row:2; }
+.dpad .down{ grid-column:2; grid-row:3; }
+
+/* OVERLAY GAME OVER */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:100;
+  color:white;
+  text-align:center;
+  padding:20px;
+  animation:fadeIn 0.4s ease;
+}
+.overlay.show{ display:flex; }
+.overlay h2{
+  font-family:'Cinzel',serif;
+  font-size:38px;
+  margin:10px;
+  background:linear-gradient(90deg,#fca5a5,#facc15);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.overlay p{ color:#fde68a; margin-bottom:20px; font-size:18px; }
+.overlay button{
+  margin:8px;
+  padding:14px 28px;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,var(--vermelho),#f97316);
+  border:none;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 20px -5px rgba(220,38,38,0.6);
+  transition:transform 0.2s;
+}
+.overlay button:hover{ transform:translateY(-2px); }
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
-<header>
-  <h1>🌿 Amazônia Games</h1>
-</header>
+<!-- VAGALUMES -->
+<div class="fireflies" id="fireflies"></div>
 
-<div id="menu" class="container">
-  <div class="card" onclick="start()">
-    <h2>🌪️ Saci Poderes</h2>
-    <p>Use habilidades para sobreviver ao caçador.</p>
-    <div class="btn">Jogar</div>
+<!-- BOTÃO VOLTAR -->
+<button class="voltar" onclick="voltar()">← Menu</button>
+
+<!-- MENU -->
+<div id="menu" class="tela">
+  <div class="badge">✦ Lenda Amazônica ✦</div>
+  <h1 class="titulo">🌪️ Lenda do Saci</h1>
+
+  <img src="saci.png" class="saci-img" alt="Saci">
+
+  <div class="historia">
+    O Saci é um menino travesso de uma perna só, com gorro vermelho mágico e
+    cachimbo. Aparece em redemoinhos pela floresta amazônica, fazendo
+    traquinagens e fugindo dos caçadores. Use seus poderes — Vento, Teleporte
+    e Redemoinho — para sobreviver o máximo possível!
   </div>
+
+  <button class="btn-comecar" onclick="start()">Começar</button>
 </div>
 
 <!-- GAME -->
 <div id="game">
 
-  <div class="ui">
-    🌪️ Saci em jogo
+  <div class="ui">🌪️ SACI · <span id="pontos">0</span></div>
+
+  <div class="dpad">
+    <button class="up"    data-dir="up">⬆️</button>
+    <button class="left"  data-dir="left">⬅️</button>
+    <button class="right" data-dir="right">➡️</button>
+    <button class="down"  data-dir="down">⬇️</button>
   </div>
 
   <div class="powers">
@@ -121,169 +372,221 @@ button{
   <canvas id="c"></canvas>
 </div>
 
+<!-- GAME OVER -->
+<div id="overlay" class="overlay">
+  <h2>💀 Capturado!</h2>
+  <p>Pontuação: <span id="finalScore">0</span></p>
+  <button onclick="reiniciar()">🔄 Tentar de novo</button>
+  <button onclick="voltar()">← Menu</button>
+</div>
+
 <script>
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
 
 let w,h;
 function resize(){
-  w=window.innerWidth;
-  h=window.innerHeight;
-  c.width=w;
-  c.height=h;
+  w=window.innerWidth; h=window.innerHeight;
+  c.width=w; c.height=h;
 }
+window.addEventListener("resize",resize);
 resize();
 
-// ESTADO
-let saci={x:300,y:300,s:25,vx:0,vy:0};
-let inimigo={x:100,y:100};
-let tiros=[];
-let redemoinhoAtivo=false;
+let saci, inimigo, tiros, redemoinhoAtivo, tiroTimer, pontos, sobrevivenciaTimer, gameOver;
+let teclas = { up:false, down:false, left:false, right:false };
+let rodando = false;
 
-// TIMER DE TIRO (6 SEGUNDOS ≈ 360 FRAMES)
-let tiroTimer=0;
+function reset(){
+  saci={x:w/2, y:h/2, s:25};
+  inimigo={x:100, y:100};
+  tiros=[]; redemoinhoAtivo=false; tiroTimer=0;
+  pontos=0; sobrevivenciaTimer=0; gameOver=false;
+  document.getElementById("pontos").innerText=pontos;
+  document.getElementById("overlay").classList.remove("show");
+}
 
-// MENU
 function start(){
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="block";
-  loop();
+  resize(); reset();
+  if(!rodando){ rodando = true; loop(); }
 }
 
-// CONTROLES SACI
-window.addEventListener("keydown",(e)=>{
-  if(e.key=="ArrowUp")saci.y-=6;
-  if(e.key=="ArrowDown")saci.y+=6;
-  if(e.key=="ArrowLeft")saci.x-=6;
-  if(e.key=="ArrowRight")saci.x+=6;
+function voltar(){ window.location.href = "index.html"; }
+function reiniciar(){ reset(); }
 
-  if(e.key=="q")vento();
-  if(e.key=="w")teleporte();
-  if(e.key=="e")redemoinho();
+window.addEventListener("keydown",(e)=>{
+  if(e.key=="ArrowUp"||e.key=="w") teclas.up=true;
+  if(e.key=="ArrowDown"||e.key=="s") teclas.down=true;
+  if(e.key=="ArrowLeft"||e.key=="a") teclas.left=true;
+  if(e.key=="ArrowRight"||e.key=="d") teclas.right=true;
+  if(e.key=="q") vento();
+  if(e.key=="e") teleporte();
+  if(e.key=="r") redemoinho();
+});
+window.addEventListener("keyup",(e)=>{
+  if(e.key=="ArrowUp"||e.key=="w") teclas.up=false;
+  if(e.key=="ArrowDown"||e.key=="s") teclas.down=false;
+  if(e.key=="ArrowLeft"||e.key=="a") teclas.left=false;
+  if(e.key=="ArrowRight"||e.key=="d") teclas.right=false;
 });
 
-// 🌪️ VENTO
+document.querySelectorAll(".dpad button").forEach(btn=>{
+  const dir = btn.dataset.dir;
+  const press = e=>{ e.preventDefault(); teclas[dir]=true; };
+  const release = e=>{ e.preventDefault(); teclas[dir]=false; };
+  btn.addEventListener("touchstart", press, {passive:false});
+  btn.addEventListener("touchend", release, {passive:false});
+  btn.addEventListener("touchcancel", release, {passive:false});
+  btn.addEventListener("mousedown", press);
+  btn.addEventListener("mouseup", release);
+  btn.addEventListener("mouseleave", release);
+});
+
+function moverSaci(){
+  const v = 6;
+  if(teclas.up) saci.y -= v;
+  if(teclas.down) saci.y += v;
+  if(teclas.left) saci.x -= v;
+  if(teclas.right) saci.x += v;
+  saci.x = Math.max(0, Math.min(w - saci.s, saci.x));
+  saci.y = Math.max(0, Math.min(h - saci.s, saci.y));
+}
+
 function vento(){
-  let dx=inimigo.x-saci.x;
-  let dy=inimigo.y-saci.y;
+  if(gameOver) return;
+  let dx=inimigo.x-saci.x, dy=inimigo.y-saci.y;
   let d=Math.sqrt(dx*dx+dy*dy);
-
-  if(d<250){
-    inimigo.x+=dx*-0.6;
-    inimigo.y+=dy*-0.6;
+  if(d<250 && d>0){
+    inimigo.x += (dx/d)*120;
+    inimigo.y += (dy/d)*120;
   }
-
   tiros.forEach(t=>{
-    t.vx += (t.x-saci.x)*0.02;
-    t.vy += (t.y-saci.y)*0.02;
+    let tdx = t.x - saci.x, tdy = t.y - saci.y;
+    let td = Math.sqrt(tdx*tdx + tdy*tdy) || 1;
+    t.vx += (tdx/td)*4; t.vy += (tdy/td)*4;
   });
 }
 
-// 🌀 TELEPORTE
 function teleporte(){
-  saci.x=Math.random()*w;
-  saci.y=Math.random()*h;
+  if(gameOver) return;
+  saci.x=Math.random()*(w-saci.s);
+  saci.y=Math.random()*(h-saci.s);
 }
 
-// 💨 REDEMOINHO
 function redemoinho(){
+  if(gameOver) return;
   redemoinhoAtivo=true;
   setTimeout(()=>redemoinhoAtivo=false,3000);
 }
 
-// ATIRAR (CAÇADOR)
 function atirar(){
-  let dx=saci.x-inimigo.x;
-  let dy=saci.y-inimigo.y;
-  let d=Math.sqrt(dx*dx+dy*dy);
-
-  tiros.push({
-    x:inimigo.x,
-    y:inimigo.y,
-    vx:dx/d*5,
-    vy:dy/d*5
-  });
+  let dx=saci.x-inimigo.x, dy=saci.y-inimigo.y;
+  let d=Math.sqrt(dx*dx+dy*dy) || 1;
+  tiros.push({x:inimigo.x, y:inimigo.y, vx:dx/d*5, vy:dy/d*5});
 }
 
-// UPDATE INIMIGO
 function updateEnemy(){
   inimigo.x += (saci.x-inimigo.x)*0.01;
   inimigo.y += (saci.y-inimigo.y)*0.01;
-
-  // ⏱️ TIRO A CADA 6 SEGUNDOS
   tiroTimer++;
-  if(tiroTimer>=360){
-    atirar();
-    tiroTimer=0;
+  if(tiroTimer>=360){ atirar(); tiroTimer=0; }
+}
+
+function updateTiros(){
+  for(let i = tiros.length-1; i>=0; i--){
+    let t = tiros[i];
+    if(redemoinhoAtivo){
+      let dx=t.x-saci.x, dy=t.y-saci.y;
+      let d=Math.sqrt(dx*dx+dy*dy) || 1;
+      t.vx += (dx/d)*0.6; t.vy += (dy/d)*0.6;
+    }
+    t.x+=t.vx; t.y+=t.vy;
+    if(t.x<-50 || t.x>w+50 || t.y<-50 || t.y>h+50) tiros.splice(i,1);
   }
 }
 
-// TIROS
-function updateTiros(){
-  tiros.forEach(t=>{
-
-    // redemoinho puxa tiro
-    if(redemoinhoAtivo){
-      let dx=t.x-saci.x;
-      let dy=t.y-saci.y;
-      t.vx+=dx*-0.02;
-      t.vy+=dy*-0.02;
-    }
-
-    t.x+=t.vx;
-    t.y+=t.vy;
-  });
-}
-
-// COLISÃO
 function colisao(){
-  tiros.forEach(t=>{
-    let dx=t.x-saci.x;
-    let dy=t.y-saci.y;
-    let d=Math.sqrt(dx*dx+dy*dy);
-
-    if(d<20){
-      alert("💀 Você foi capturado!");
-      location.reload();
-    }
-  });
+  for(let t of tiros){
+    let dx=t.x-saci.x, dy=t.y-saci.y;
+    if(Math.sqrt(dx*dx+dy*dy) < 20){ perderJogo(); return; }
+  }
 }
 
-// DESENHO
+function perderJogo(){
+  gameOver = true;
+  document.getElementById("finalScore").innerText = pontos;
+  document.getElementById("overlay").classList.add("show");
+}
+
+function atualizarPontos(){
+  sobrevivenciaTimer++;
+  if(sobrevivenciaTimer>=30){
+    pontos++;
+    document.getElementById("pontos").innerText=pontos;
+    sobrevivenciaTimer=0;
+  }
+}
+
 function draw(){
   ctx.clearRect(0,0,w,h);
 
-  // SACI
-  ctx.fillStyle="red";
+  // Saci com glow vermelho
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "#dc2626";
+  ctx.fillStyle="#ef4444";
   ctx.fillRect(saci.x,saci.y,saci.s,saci.s);
+  ctx.shadowBlur = 0;
 
-  // INIMIGO
-  ctx.fillStyle="blue";
+  // Inimigo
+  ctx.fillStyle="#3b82f6";
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = "#1d4ed8";
   ctx.fillRect(inimigo.x,inimigo.y,30,30);
+  ctx.shadowBlur = 0;
 
-  // TIROS
-  ctx.fillStyle="yellow";
-  tiros.forEach(t=>{
-    ctx.fillRect(t.x,t.y,5,5);
-  });
+  // Tiros amarelos com glow
+  ctx.fillStyle="#facc15";
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = "#facc15";
+  tiros.forEach(t=> ctx.fillRect(t.x,t.y,6,6));
+  ctx.shadowBlur = 0;
 
-  // REDEMOINHO
+  // Redemoinho
   if(redemoinhoAtivo){
     ctx.beginPath();
-    ctx.arc(saci.x,saci.y,60,0,Math.PI*2);
-    ctx.strokeStyle="rgba(0,255,255,0.3)";
+    ctx.arc(saci.x+saci.s/2,saci.y+saci.s/2,60,0,Math.PI*2);
+    ctx.strokeStyle="rgba(34,211,238,0.7)";
+    ctx.lineWidth=4;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#22d3ee";
     ctx.stroke();
+    ctx.shadowBlur = 0;
   }
 }
 
-// LOOP
 function loop(){
-  updateEnemy();
-  updateTiros();
-  colisao();
+  if(!gameOver){
+    moverSaci();
+    updateEnemy();
+    updateTiros();
+    colisao();
+    atualizarPontos();
+  }
   draw();
-
   requestAnimationFrame(loop);
+}
+
+// VAGALUMES
+const ff = document.getElementById("fireflies");
+for(let i=0; i<25; i++){
+  const f = document.createElement("div");
+  f.className = "firefly";
+  f.style.left = Math.random()*100+"%";
+  f.style.top = (60 + Math.random()*40)+"%";
+  f.style.animationDuration = (5 + Math.random()*7)+"s";
+  f.style.animationDelay = Math.random()*8+"s";
+  ff.appendChild(f);
 }
 </script>
 
