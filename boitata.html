@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Lenda do Boitatá</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,16 @@
   --fogo:#fb923c;
 }
 
+html, body{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+}
+
 body{
   font-family:'Inter',sans-serif;
   background:
@@ -26,10 +36,10 @@ body{
     linear-gradient(180deg,#020617 0%,#1a0a04 50%,#7c2d12 100%);
   color:white;
   text-align:center;
-  min-height:100vh;
-  overflow-x:hidden;
   user-select:none;
+  -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
+  overflow-y:auto;       /* só rola dentro da .tela do menu */
 }
 
 /* BRASAS */
@@ -195,9 +205,12 @@ h1.titulo{
 /* GAME */
 #game{
   display:none;
-  position:relative;
-  width:100vw;
-  height:100vh;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  /* dvh evita que o layout salte quando a barra do navegador esconde */
+  height:100dvh;
 }
 
 canvas{
@@ -223,6 +236,44 @@ canvas{
   color:var(--laranja-claro);
   border:1px solid rgba(249,115,22,0.3);
 }
+
+.hp-hud{
+  position:absolute;
+  top:16px;
+  right:16px;
+  background:rgba(20,5,5,0.7);
+  backdrop-filter:blur(10px);
+  padding:8px 16px;
+  border-radius:30px;
+  z-index:10;
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  letter-spacing:2px;
+  color:#fca5a5;
+  border:1px solid rgba(239,68,68,0.4);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.hp-hud .hp-hearts{
+  font-size:18px;
+  letter-spacing:2px;
+  filter:drop-shadow(0 0 6px rgba(239,68,68,0.7));
+  transition:transform 0.2s;
+}
+.hp-hud.dano .hp-hearts{ transform:scale(1.25); }
+
+/* Flash vermelho de dano por cima da tela */
+#damageFlash{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center, transparent 30%, rgba(220,38,38,0.55));
+  pointer-events:none;
+  opacity:0;
+  z-index:9;
+  transition:opacity 0.15s;
+}
+#damageFlash.show{ opacity:1; }
 
 /* DPAD */
 .dpad{
@@ -267,12 +318,49 @@ canvas{
   cursor:pointer;
   box-shadow:0 0 30px rgba(249,115,22,0.7),inset 0 0 20px rgba(254,240,138,0.4);
   animation:firePulse 1.6s ease-in-out infinite;
+  --cd:0deg;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
 }
 @keyframes firePulse{
   0%,100%{ box-shadow:0 0 30px rgba(249,115,22,0.7),inset 0 0 20px rgba(254,240,138,0.4); }
   50%{ box-shadow:0 0 50px rgba(249,115,22,1),inset 0 0 25px rgba(254,240,138,0.6); }
 }
 .fire-btn:active{ transform:scale(0.92); animation:none; }
+.fire-btn > *{ pointer-events:none; }
+.fire-btn .fire-cd-ring{
+  position:absolute;
+  inset:-2px;
+  border-radius:50%;
+  background:conic-gradient(rgba(0,0,0,0.78) var(--cd), transparent 0);
+  pointer-events:none;
+}
+.fire-btn .fire-cd-text{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Cinzel',serif;
+  font-size:18px;
+  font-weight:700;
+  color:#fef08a;
+  text-shadow:0 0 6px rgba(0,0,0,0.9);
+  opacity:0;
+  transition:opacity 0.15s;
+  letter-spacing:1px;
+  pointer-events:none;
+}
+.fire-btn.cooling{
+  animation:none;
+  filter:saturate(0.45) brightness(0.65);
+  cursor:not-allowed;
+  box-shadow:0 0 14px rgba(0,0,0,0.4);
+}
+.fire-btn.cooling .fire-cd-text{ opacity:1; }
+.fire-btn.cooling:active{ transform:none; }
 
 /* OVERLAY */
 .overlay{
@@ -317,6 +405,73 @@ canvas{
   transition:transform 0.2s;
 }
 .overlay button:hover{ transform:translateY(-2px); }
+
+/* ============================================
+   MOBILE — telas pequenas (até ~600px)
+   ============================================ */
+@media (max-width: 600px){
+  /* Header — topo organizado em linha */
+  .voltar{
+    top:10px; left:10px;
+    padding:7px 12px;
+    font-size:11px;
+  }
+  .hud{
+    top:10px;
+    left:auto;
+    right:90px;
+    padding:7px 12px;
+    font-size:11px;
+    letter-spacing:1px;
+  }
+  .hp-hud{
+    top:10px;
+    right:10px;
+    padding:6px 10px;
+    font-size:11px;
+    gap:6px;
+  }
+  .hp-hud .hp-label{ display:none; }   /* economiza espaço — só os corações */
+  .hp-hud .hp-hearts{ font-size:15px; }
+
+  /* Controles menores */
+  .dpad{
+    bottom:14px; left:14px;
+    grid-template-columns:48px 48px 48px;
+    grid-template-rows:48px 48px 48px;
+    gap:4px;
+  }
+  .dpad button{
+    width:48px; height:48px;
+    font-size:18px;
+    border-radius:11px;
+  }
+
+  .fire-btn{
+    width:78px; height:78px;
+    bottom:30px; right:18px;
+    font-size:32px;
+  }
+  .fire-btn .fire-cd-text{ font-size:15px; }
+
+  /* Menu — telas menores também */
+  .historia{ padding:18px 20px; font-size:14px; }
+  .boi-img{ width:200px; }
+}
+
+/* Telas muito pequenas (até ~380px) */
+@media (max-width: 380px){
+  .hud{ right:74px; font-size:10px; padding:6px 9px; }
+  .hp-hud{ font-size:10px; padding:5px 8px; }
+  .hp-hud .hp-hearts{ font-size:13px; }
+  .voltar{ font-size:10px; padding:6px 10px; }
+  .dpad{
+    grid-template-columns:42px 42px 42px;
+    grid-template-rows:42px 42px 42px;
+  }
+  .dpad button{ width:42px; height:42px; font-size:16px; }
+  .fire-btn{ width:68px; height:68px; bottom:24px; right:14px; font-size:28px; }
+}
 </style>
 </head>
 
@@ -349,6 +504,10 @@ canvas{
 <div id="game">
 
   <div class="hud">🔥 BOITATÁ · <span id="pontos">0</span></div>
+  <div class="hp-hud" id="hpHud">
+    <span class="hp-label">VIDAS</span>
+    <span class="hp-hearts" id="hpHearts">❤️❤️❤️</span>
+  </div>
 
   <canvas id="c"></canvas>
 
@@ -359,7 +518,13 @@ canvas{
     <button class="down"  data-dir="down">⬇️</button>
   </div>
 
-  <button class="fire-btn" id="fireBtn">🔥</button>
+  <button class="fire-btn" id="fireBtn" type="button">
+    <span class="fire-cd-ring"></span>
+    <span style="position:relative; z-index:2;">🔥</span>
+    <span class="fire-cd-text"></span>
+  </button>
+
+  <div id="damageFlash"></div>
 
 </div>
 
@@ -377,23 +542,78 @@ const ctx=c.getContext("2d");
 
 let w,h;
 function resize(){
-  w=c.clientWidth || window.innerWidth;
-  h=c.clientHeight || window.innerHeight;
+  // usa visualViewport quando disponível — confiável em iOS/Android pois ignora barra do navegador
+  const vv = window.visualViewport;
+  w = Math.round(vv ? vv.width  : window.innerWidth);
+  h = Math.round(vv ? vv.height : window.innerHeight);
   c.width=w; c.height=h;
 }
-window.addEventListener("resize",resize);
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", ()=>setTimeout(resize, 150));
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", resize);
+}
 
-let boi = {x:200, y:200, s:25, speed:5, dirX:1, dirY:0};
-let inimigos=[], obstaculos=[], tiros=[];
+let boi = {x:200, y:200, s:22, speed:5, dirX:1, dirY:0, trail:[]};
+const TRAIL_LEN = 18;        // tamanho do corpo da serpente
+const TRAIL_SPACING = 3;     // distância entre os pontos do rastro
+let inimigos=[], obstaculos=[], tiros=[], tirosInimigos=[];
 let pontos=0, gameOver=false, rodando=false;
+let tick=0;
 let teclas = { up:false, down:false, left:false, right:false };
 
+// Cooldown da bola de fogo
+const FIRE_FPS = 60;
+const FIRE_CD = 45;          // ~0.75s entre tiros
+let fireCooldown = 0;
+
+// Sistema de vidas
+const MAX_HP = 3;
+let hp = MAX_HP;
+let invuln = 0;              // ticks de invulnerabilidade após receber dano
+
+function atualizarHpHud(){
+  const heartsEl = document.getElementById('hpHearts');
+  let str = '';
+  for(let i=0;i<MAX_HP;i++) str += (i < hp ? '❤️' : '🖤');
+  heartsEl.innerText = str;
+}
+
+function tomarDano(){
+  if(invuln > 0 || gameOver) return;
+  hp--;
+  invuln = 90;  // 1.5s de invulnerabilidade
+  atualizarHpHud();
+
+  // pulso visual no HUD de vidas
+  const hpHud = document.getElementById('hpHud');
+  hpHud.classList.add('dano');
+  setTimeout(()=>hpHud.classList.remove('dano'), 200);
+
+  // flash vermelho na tela
+  const flash = document.getElementById('damageFlash');
+  flash.classList.add('show');
+  setTimeout(()=>flash.classList.remove('show'), 220);
+
+  if(hp <= 0) perderJogo();
+}
+
 function reset(){
-  inimigos=[]; obstaculos=[]; tiros=[];
-  pontos=0; gameOver=false;
+  inimigos=[]; obstaculos=[]; tiros=[]; tirosInimigos=[];
+  pontos=0; gameOver=false; tick=0; fireCooldown=0;
+  hp=MAX_HP; invuln=0;
+  atualizarHpHud();
   boi.x=w/2; boi.y=h/2; boi.dirX=1; boi.dirY=0;
+  boi.trail=[];
+  for(let i=0;i<TRAIL_LEN*TRAIL_SPACING;i++){
+    boi.trail.push({x:boi.x - i, y:boi.y});
+  }
   document.getElementById("pontos").innerText=pontos;
   document.getElementById("overlay").classList.remove("show");
+  const fb = document.getElementById('fireBtn');
+  fb.classList.remove('cooling');
+  fb.style.setProperty('--cd', '0deg');
+  fb.querySelector('.fire-cd-text').textContent = '';
 }
 
 function start(){
@@ -450,11 +670,30 @@ function moverBoi(){
   }
   boi.x = Math.max(boi.s, Math.min(w-boi.s, boi.x));
   boi.y = Math.max(boi.s, Math.min(h-boi.s, boi.y));
+
+  // registra rastro pra desenhar o corpo da serpente
+  boi.trail.unshift({x:boi.x, y:boi.y});
+  if(boi.trail.length > TRAIL_LEN*TRAIL_SPACING) boi.trail.length = TRAIL_LEN*TRAIL_SPACING;
 }
 
 function fire(){
-  if(gameOver || !rodando) return;
+  if(gameOver || !rodando || fireCooldown > 0) return;
+  fireCooldown = FIRE_CD;
   tiros.push({x: boi.x, y: boi.y, vx: boi.dirX*8, vy: boi.dirY*8});
+}
+
+function updateFireBtn(){
+  const fb = document.getElementById('fireBtn');
+  if(fireCooldown > 0){
+    fb.classList.add('cooling');
+    const pct = (fireCooldown / FIRE_CD) * 360;
+    fb.style.setProperty('--cd', pct + 'deg');
+    fb.querySelector('.fire-cd-text').textContent = (fireCooldown / FIRE_FPS).toFixed(1);
+  } else {
+    fb.classList.remove('cooling');
+    fb.style.setProperty('--cd', '0deg');
+    fb.querySelector('.fire-cd-text').textContent = '';
+  }
 }
 
 setInterval(()=>{
@@ -465,8 +704,14 @@ setInterval(()=>{
   else if(edge===1){ x=Math.random()*w; y=h+20; }
   else if(edge===2){ x=-20; y=Math.random()*h; }
   else { x=w+20; y=Math.random()*h; }
-  inimigos.push({x,y,s:18,speed:1.2});
-},1500);
+  // caçador agora tem direção de visão e timer de tiro
+  inimigos.push({
+    x, y, s:18, speed:0.35,
+    lookAngle: Math.atan2(boi.y - y, boi.x - x),
+    tiroTimer: Math.floor(Math.random()*150),
+    spawnAge: 0
+  });
+},2200);
 
 setInterval(()=>{
   if(gameOver || !rodando) return;
@@ -484,19 +729,81 @@ function dist(a,b){ return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2); }
 function update(){
   if(gameOver) return;
 
+  // cooldown da bola de fogo
+  if(fireCooldown > 0) fireCooldown--;
+  updateFireBtn();
+
+  // ===== CAÇADORES =====
   for(let ii=inimigos.length-1; ii>=0; ii--){
     let i = inimigos[ii];
-    let dx = boi.x - i.x, dy = boi.y - i.y;
-    let d = Math.sqrt(dx*dx+dy*dy) || 1;
-    i.x += (dx/d) * i.speed;
-    i.y += (dy/d) * i.speed;
-    if(dist(boi,i) < boi.s + i.s){
-      inimigos.splice(ii,1);
-      pontos += 5;
-      document.getElementById("pontos").innerText = pontos;
+    i.spawnAge++;
+
+    // calcula direção alvo (em direção ao Boitatá)
+    const targetAngle = Math.atan2(boi.y - i.y, boi.x - i.x);
+
+    // gira o lookAngle suavemente em direção ao target (não instantâneo, dá chance de pegar por trás)
+    let diff = targetAngle - i.lookAngle;
+    while(diff >  Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+    const turnSpeed = 0.015;          // ~0.85°/frame, ~50°/s — mais devagar pra dar chance
+    if(Math.abs(diff) < turnSpeed) i.lookAngle = targetAngle;
+    else i.lookAngle += Math.sign(diff) * turnSpeed;
+
+    // anda lentamente na direção que está olhando
+    i.x += Math.cos(i.lookAngle) * i.speed;
+    i.y += Math.sin(i.lookAngle) * i.speed;
+
+    // separação simples entre caçadores
+    for(let jj=0; jj<inimigos.length; jj++){
+      if(jj === ii) continue;
+      const o = inimigos[jj];
+      const ddx = i.x - o.x, ddy = i.y - o.y;
+      const dd = Math.sqrt(ddx*ddx + ddy*ddy);
+      if(dd > 0 && dd < 36){
+        const push = (36 - dd) / 2;
+        i.x += (ddx/dd) * push;
+        i.y += (ddy/dd) * push;
+      }
+    }
+
+    // tiro periódico — só atira se Boitatá estiver dentro do cone de visão (~ frente)
+    i.tiroTimer++;
+    if(i.tiroTimer >= 170 && i.spawnAge > 60){
+      i.tiroTimer = 0;
+      if(Math.abs(diff) < Math.PI*0.5){     // cone frontal de ~180°
+        const speed = 3.5;
+        const ang = Math.atan2(boi.y - i.y, boi.x - i.x);
+        tirosInimigos.push({
+          x: i.x + Math.cos(ang)*16,
+          y: i.y + Math.sin(ang)*16,
+          vx: Math.cos(ang) * speed,
+          vy: Math.sin(ang) * speed
+        });
+      }
+    }
+
+    // colisão direta com Boitatá — só come por trás
+    if(dist(boi, i) < boi.s + i.s){
+      const attackAngle = Math.atan2(boi.y - i.y, boi.x - i.x);
+      let angDiff = attackAngle - i.lookAngle;
+      while(angDiff >  Math.PI) angDiff -= Math.PI*2;
+      while(angDiff < -Math.PI) angDiff += Math.PI*2;
+
+      if(Math.abs(angDiff) > Math.PI/2){
+        // Boitatá veio por trás → DEVORA
+        inimigos.splice(ii,1);
+        pontos += 5;
+        document.getElementById("pontos").innerText = pontos;
+      } else {
+        // Veio pela frente → empurra o caçador para fora (não come)
+        const overlap = (boi.s + i.s) - dist(boi, i);
+        i.x -= Math.cos(attackAngle) * overlap;
+        i.y -= Math.sin(attackAngle) * overlap;
+      }
     }
   }
 
+  // ===== BOLAS DE FOGO DO BOITATÁ =====
   for(let ti=tiros.length-1; ti>=0; ti--){
     let t = tiros[ti];
     t.x += t.vx; t.y += t.vy;
@@ -526,6 +833,23 @@ function update(){
     }
   }
 
+  // ===== TIROS DOS CAÇADORES =====
+  if(invuln > 0) invuln--;
+  for(let ti=tirosInimigos.length-1; ti>=0; ti--){
+    let t = tirosInimigos[ti];
+    t.x += t.vx; t.y += t.vy;
+    if(t.x < -30 || t.x > w+30 || t.y < -30 || t.y > h+30){
+      tirosInimigos.splice(ti,1);
+      continue;
+    }
+    if(dist(t, boi) < boi.s + 5){
+      tirosInimigos.splice(ti,1);   // tiro some ao acertar
+      tomarDano();
+      if(gameOver) return;
+    }
+  }
+
+  // ===== ÁRVORES (obstáculos) =====
   for(let o of obstaculos){
     let centro = {x:o.x+o.s/2, y:o.y+o.s/2};
     if(dist(boi, centro) < boi.s + o.s/2 - 6){
@@ -540,64 +864,322 @@ function perderJogo(){
   document.getElementById("overlay").classList.add("show");
 }
 
+// ===== PARALLAX — camadas de fundo da floresta =====
+function drawParallax(){
+  // Camada 1 (mais distante) — manchas escuras grandes de copas de árvore
+  const off1x = -boi.x * 0.06, off1y = -boi.y * 0.06;
+  ctx.fillStyle = "rgba(20,40,25,0.55)";
+  for(let i=0; i<8; i++){
+    const baseX = (i*180) % (w+360);
+    const baseY = ((i*97) % (h+200));
+    let x = baseX + (off1x % (w+360));
+    let y = baseY + (off1y % (h+200));
+    x = ((x % (w+360)) + (w+360)) % (w+360) - 180;
+    y = ((y % (h+200)) + (h+200)) % (h+200) - 100;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 90, 70, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Camada 2 (média) — folhagem mais visível
+  const off2x = -boi.x * 0.18, off2y = -boi.y * 0.18;
+  ctx.fillStyle = "rgba(34,90,40,0.5)";
+  for(let i=0; i<14; i++){
+    const baseX = (i*131 + 40) % (w+260);
+    const baseY = ((i*67 + 80) % (h+260));
+    let x = baseX + (off2x % (w+260));
+    let y = baseY + (off2y % (h+260));
+    x = ((x % (w+260)) + (w+260)) % (w+260) - 130;
+    y = ((y % (h+260)) + (h+260)) % (h+260) - 130;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 45, 35, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Camada 3 (perto) — pequenas folhas/grama no chão da floresta
+  const off3x = -boi.x * 0.42, off3y = -boi.y * 0.42;
+  ctx.fillStyle = "rgba(120,180,90,0.18)";
+  for(let i=0; i<60; i++){
+    const baseX = (i*47 + 17) % (w+80);
+    const baseY = ((i*89 + 23) % (h+80));
+    let x = baseX + (off3x % (w+80));
+    let y = baseY + (off3y % (h+80));
+    x = ((x % (w+80)) + (w+80)) % (w+80) - 40;
+    y = ((y % (h+80)) + (h+80)) % (h+80) - 40;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Camada 4 (faíscas) — partículas brilhantes quase no nível da serpente
+  const off4x = -boi.x * 0.7, off4y = -boi.y * 0.7;
+  for(let i=0; i<25; i++){
+    const baseX = (i*73 + 11) % (w+60);
+    const baseY = ((i*41 + 7) % (h+60));
+    let x = baseX + (off4x % (w+60));
+    let y = baseY + (off4y % (h+60));
+    x = ((x % (w+60)) + (w+60)) % (w+60) - 30;
+    y = ((y % (h+60)) + (h+60)) % (h+60) - 30;
+    const blink = (Math.sin(tick*0.05 + i) + 1) / 2;
+    ctx.fillStyle = `rgba(254,215,170,${0.15 + blink*0.25})`;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
 function draw(){
   ctx.clearRect(0,0,w,h);
+  tick++;
 
-  // BOITATÁ com glow de fogo
-  ctx.shadowBlur = 25;
+  drawParallax();
+
+  // ===== BOITATÁ — SERPENTE DE FOGO =====
+  // Pisca quando invulnerável (depois de tomar dano)
+  const invulnAlpha = invuln > 0 ? (Math.floor(tick/4) % 2 === 0 ? 0.35 : 1) : 1;
+  ctx.globalAlpha = invulnAlpha;
+
+  // Cauda primeiro (segmentos do final pro começo)
+  for(let i = TRAIL_LEN-1; i >= 1; i--){
+    const idx = i * TRAIL_SPACING;
+    if(!boi.trail[idx]) continue;
+    const p = boi.trail[idx];
+    const t = i / TRAIL_LEN;                // 0 (cabeça) → 1 (cauda)
+    const r = boi.s * (1 - t*0.55);         // diminui em direção à cauda
+    const wob = Math.sin(tick*0.15 + i*0.6) * 4 * t; // ondulação
+
+    // perpendicular à direção pra dar zigue-zague
+    const perpX = -boi.dirY, perpY = boi.dirX;
+    const sx = p.x + perpX * wob;
+    const sy = p.y + perpY * wob;
+
+    // glow externo de fogo
+    ctx.shadowBlur = 22 - i*0.6;
+    ctx.shadowColor = i < 3 ? "#fef08a" : (i < 8 ? "#fb923c" : "#dc2626");
+
+    // gradiente do segmento (amarelo → laranja → vermelho)
+    const g = ctx.createRadialGradient(sx, sy, 1, sx, sy, r);
+    g.addColorStop(0, "#fef9c3");
+    g.addColorStop(0.35, "#fb923c");
+    g.addColorStop(0.8, "#dc2626");
+    g.addColorStop(1, "rgba(127,29,29,0.6)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fill();
+
+    // chamas que sobem do segmento
+    if(i % 2 === 0){
+      ctx.fillStyle = `rgba(254,240,138,${0.5 - t*0.4})`;
+      ctx.beginPath();
+      ctx.arc(sx + (Math.random()-0.5)*4, sy - r - Math.random()*6, r*0.35, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  ctx.shadowBlur = 0;
+
+  // ===== CABEÇA =====
+  const hx = boi.x, hy = boi.y;
+  const hr = boi.s + 4;
+
+  // halo grande
+  ctx.shadowBlur = 35;
   ctx.shadowColor = "#fb923c";
-  let g = ctx.createRadialGradient(boi.x,boi.y,2,boi.x,boi.y,boi.s);
-  g.addColorStop(0,"#fef08a");
-  g.addColorStop(0.5,"#fb923c");
-  g.addColorStop(1,"#dc2626");
-  ctx.fillStyle=g;
+  const headG = ctx.createRadialGradient(hx, hy, 2, hx, hy, hr);
+  headG.addColorStop(0, "#fef9c3");
+  headG.addColorStop(0.4, "#fbbf24");
+  headG.addColorStop(0.8, "#dc2626");
+  headG.addColorStop(1, "#7f1d1d");
+  ctx.fillStyle = headG;
   ctx.beginPath();
-  ctx.arc(boi.x,boi.y,boi.s,0,Math.PI*2);
+  ctx.arc(hx, hy, hr, 0, Math.PI*2);
   ctx.fill();
   ctx.shadowBlur = 0;
 
-  // Indicador de direção
-  ctx.strokeStyle="rgba(254,240,138,0.8)";
-  ctx.lineWidth=3;
+  // olhos da serpente — dois pontos pretos com brilho amarelo
+  const ang = Math.atan2(boi.dirY, boi.dirX);
+  const eyeOffset = hr * 0.45;
+  const eyeSep = hr * 0.4;
+  for(const s of [-1, 1]){
+    const ex = hx + Math.cos(ang)*eyeOffset + Math.cos(ang + Math.PI/2)*eyeSep*s;
+    const ey = hy + Math.sin(ang)*eyeOffset + Math.sin(ang + Math.PI/2)*eyeSep*s;
+    // branco do olho
+    ctx.fillStyle = "#fef08a";
+    ctx.beginPath(); ctx.arc(ex, ey, 4, 0, Math.PI*2); ctx.fill();
+    // pupila
+    ctx.fillStyle = "#0a0a0a";
+    ctx.beginPath(); ctx.arc(ex, ey, 2, 0, Math.PI*2); ctx.fill();
+  }
+
+  // língua bifurcada
+  const lx = hx + Math.cos(ang) * (hr + 4);
+  const ly = hy + Math.sin(ang) * (hr + 4);
+  const ltipX = hx + Math.cos(ang) * (hr + 14 + Math.sin(tick*0.4)*2);
+  const ltipY = hy + Math.sin(ang) * (hr + 14 + Math.sin(tick*0.4)*2);
+  ctx.strokeStyle = "#fbbf24";
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(boi.x, boi.y);
-  ctx.lineTo(boi.x + boi.dirX*32, boi.y + boi.dirY*32);
+  ctx.moveTo(lx, ly);
+  ctx.lineTo(ltipX, ltipY);
   ctx.stroke();
 
-  // Inimigos verdes com glow
-  ctx.shadowBlur = 12;
-  ctx.shadowColor = "#22c55e";
-  ctx.fillStyle="#86efac";
-  inimigos.forEach(i=>{
+  ctx.globalAlpha = 1;     // restaura alpha após desenhar Boitatá
+
+  // ===== ÁRVORES (obstáculos) — desenhadas antes dos inimigos pra ficarem atrás =====
+  obstaculos.forEach(o=>{
+    const cx = o.x + o.s/2, cy = o.y + o.s/2;
+    const trunkW = o.s * 0.32;
+    const trunkH = o.s * 0.6;
+
+    // sombra da copa no chão
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
     ctx.beginPath();
-    ctx.arc(i.x,i.y,i.s,0,Math.PI*2);
+    ctx.ellipse(cx, cy + o.s*0.55, o.s*0.55, 6, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // tronco
+    let trunkG = ctx.createLinearGradient(cx - trunkW/2, 0, cx + trunkW/2, 0);
+    trunkG.addColorStop(0, "#451a03");
+    trunkG.addColorStop(0.5, "#92400e");
+    trunkG.addColorStop(1, "#451a03");
+    ctx.fillStyle = trunkG;
+    ctx.fillRect(cx - trunkW/2, cy, trunkW, trunkH);
+
+    // ranhuras do tronco
+    ctx.strokeStyle = "rgba(20,5,0,0.55)";
+    ctx.lineWidth = 1;
+    for(let yy=4; yy<trunkH; yy+=8){
+      ctx.beginPath();
+      ctx.moveTo(cx - trunkW/2 + 2, cy + yy);
+      ctx.lineTo(cx + trunkW/2 - 2, cy + yy + 2);
+      ctx.stroke();
+    }
+
+    // copa — 3 círculos sobrepostos (verde escuro → claro)
+    const copaY = cy - o.s*0.05;
+    const folhas = [
+      {x: cx - o.s*0.3, y: copaY,        r: o.s*0.42, c1:"#15803d", c2:"#052e16"},
+      {x: cx + o.s*0.3, y: copaY,        r: o.s*0.42, c1:"#16a34a", c2:"#14532d"},
+      {x: cx,           y: copaY - o.s*0.25, r: o.s*0.5,  c1:"#22c55e", c2:"#166534"},
+    ];
+    folhas.forEach(f=>{
+      const fg = ctx.createRadialGradient(f.x - f.r*0.3, f.y - f.r*0.3, 2, f.x, f.y, f.r);
+      fg.addColorStop(0, f.c1);
+      fg.addColorStop(1, f.c2);
+      ctx.fillStyle = fg;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // pontinhos de luz/folhas brilhantes
+    ctx.fillStyle = "rgba(190,242,100,0.6)";
+    for(let p=0; p<5; p++){
+      const ang = (p/5)*Math.PI*2 + tick*0.01;
+      const px = cx + Math.cos(ang) * o.s*0.35;
+      const py = copaY + Math.sin(ang) * o.s*0.28 - o.s*0.1;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+  });
+
+  // ===== INIMIGOS — CAÇADORES (com espingarda apontando) =====
+  inimigos.forEach(i=>{
+    const fade = Math.min(1, i.spawnAge / 60);
+    ctx.globalAlpha = fade;
+
+    // sombra no chão
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    ctx.ellipse(i.x, i.y + i.s, i.s*0.7, 4, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // cone de visão sutil (mostra pra onde ele tá olhando)
+    ctx.fillStyle = "rgba(239,68,68,0.07)";
+    ctx.beginPath();
+    ctx.moveTo(i.x, i.y);
+    ctx.arc(i.x, i.y, 90, i.lookAngle - Math.PI*0.55, i.lookAngle + Math.PI*0.55);
+    ctx.closePath();
+    ctx.fill();
+
+    // corpo (camisa marrom)
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(i.x - i.s*0.5, i.y - i.s*0.3, i.s, i.s*0.9);
+
+    // cabeça
+    ctx.fillStyle = "#fde68a";
+    ctx.beginPath();
+    ctx.arc(i.x, i.y - i.s*0.6, i.s*0.4, 0, Math.PI*2);
+    ctx.fill();
+
+    // chapéu
+    ctx.fillStyle = "#1f2937";
+    ctx.fillRect(i.x - i.s*0.55, i.y - i.s*0.95, i.s*1.1, i.s*0.18);
+    ctx.fillRect(i.x - i.s*0.4, i.y - i.s*1.15, i.s*0.8, i.s*0.25);
+
+    // ESPINGARDA — apontada na direção do lookAngle
+    ctx.save();
+    ctx.translate(i.x, i.y - i.s*0.1);
+    ctx.rotate(i.lookAngle);
+    // cano
+    ctx.fillStyle = "#1c1917";
+    ctx.fillRect(0, -2, i.s*1.6, 3);
+    // coronha
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(-i.s*0.4, -3, i.s*0.5, 6);
+    ctx.restore();
+
+    // indicador "atrás dele é zona segura": pequeno arco vermelho atrás
+    const backAng = i.lookAngle + Math.PI;
+    ctx.strokeStyle = "rgba(34,197,94,0.45)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(i.x, i.y, i.s + 8, backAng - Math.PI*0.35, backAng + Math.PI*0.35);
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+  });
+
+  // ===== TIROS DOS CAÇADORES (chumbo de espingarda) =====
+  tirosInimigos.forEach(t=>{
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#fbbf24";
+    // núcleo escuro
+    ctx.fillStyle = "#1c1917";
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 4, 0, Math.PI*2);
+    ctx.fill();
+    // brilho amarelo
+    ctx.fillStyle = "#fde68a";
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 2, 0, Math.PI*2);
+    ctx.fill();
+    // rastro
+    ctx.fillStyle = "rgba(251,191,36,0.4)";
+    ctx.beginPath();
+    ctx.arc(t.x - t.vx*1.5, t.y - t.vy*1.5, 3, 0, Math.PI*2);
     ctx.fill();
   });
   ctx.shadowBlur = 0;
 
-  // Obstáculos (madeira)
-  obstaculos.forEach(o=>{
-    let og = ctx.createLinearGradient(o.x,o.y,o.x,o.y+o.s);
-    og.addColorStop(0,"#92400e");
-    og.addColorStop(1,"#451a03");
-    ctx.fillStyle=og;
-    ctx.fillRect(o.x,o.y,o.s,o.s);
-    ctx.strokeStyle="#78350f";
-    ctx.lineWidth=2;
-    ctx.strokeRect(o.x,o.y,o.s,o.s);
-  });
-
-  // Tiros com glow
-  ctx.shadowBlur = 18;
+  // ===== BOLAS DE FOGO DO BOITATÁ =====
+  ctx.shadowBlur = 22;
   ctx.shadowColor = "#fb923c";
   tiros.forEach(t=>{
-    let tg = ctx.createRadialGradient(t.x,t.y,1,t.x,t.y,10);
-    tg.addColorStop(0,"#fef08a");
-    tg.addColorStop(0.5,"#f97316");
-    tg.addColorStop(1,"#dc2626");
-    ctx.fillStyle=tg;
+    const tg = ctx.createRadialGradient(t.x, t.y, 1, t.x, t.y, 12);
+    tg.addColorStop(0, "#fef08a");
+    tg.addColorStop(0.4, "#f97316");
+    tg.addColorStop(1, "#dc2626");
+    ctx.fillStyle = tg;
     ctx.beginPath();
-    ctx.arc(t.x,t.y,10,0,Math.PI*2);
+    ctx.arc(t.x, t.y, 11, 0, Math.PI*2);
+    ctx.fill();
+
+    // mini cauda da bola de fogo
+    ctx.fillStyle = "rgba(251,146,60,0.4)";
+    ctx.beginPath();
+    ctx.arc(t.x - t.vx*1.2, t.y - t.vy*1.2, 7, 0, Math.PI*2);
     ctx.fill();
   });
   ctx.shadowBlur = 0;
