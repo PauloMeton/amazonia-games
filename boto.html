@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Lenda do Boto Cor-de-Rosa</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --rosa:#ec4899;
+  --rosa-claro:#fbcfe8;
+  --rosa-escuro:#9d174d;
+  --dourado:#facc15;
+  --terra:#7c2d12;
+}
+
+html, body{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(ellipse at 30% 80%,rgba(236,72,153,0.2),transparent 60%),
+    radial-gradient(ellipse at 70% 20%,rgba(250,204,21,0.15),transparent 60%),
+    linear-gradient(180deg,#1e1b4b 0%,#3b0764 50%,#7c2d12 100%);
+  color:white;
+  text-align:center;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  overflow-y:auto;
+}
+
+/* PARTÍCULAS — vagalumes da festa */
+.particles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  overflow:hidden;
+}
+.firefly{
+  position:absolute;
+  width:5px; height:5px;
+  background:radial-gradient(circle,#fef9c3,#fbbf24 50%,transparent 80%);
+  border-radius:50%;
+  box-shadow:0 0 12px #facc15;
+  animation:float linear infinite;
+}
+@keyframes float{
+  0%{ transform:translate(0,0); opacity:0; }
+  10%{ opacity:1; }
+  100%{ transform:translate(60px,-200px); opacity:0; }
+}
+
+/* MENU */
+.tela{
+  position:relative;
+  z-index:5;
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:60px 20px 40px;
+  animation:fadeIn 0.8s ease;
+}
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(20px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.badge{
+  display:inline-block;
+  padding:6px 18px;
+  background:rgba(236,72,153,0.15);
+  border:1px solid rgba(236,72,153,0.5);
+  border-radius:20px;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--rosa-claro);
+  margin-bottom:18px;
+  text-transform:uppercase;
+}
+h1.titulo{
+  font-family:'Cinzel',serif;
+  font-size:clamp(28px,6vw,52px);
+  font-weight:700;
+  letter-spacing:2px;
+  margin-bottom:18px;
+  background:linear-gradient(90deg,#fbcfe8,#ec4899,#facc15);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 25px rgba(236,72,153,0.5));
+}
+.boto-emoji{
+  font-size:120px;
+  margin:10px;
+  filter:drop-shadow(0 0 35px rgba(236,72,153,0.6));
+  animation:floatImg 4s ease-in-out infinite;
+}
+@keyframes floatImg{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-12px); }
+}
+.historia{
+  max-width:540px;
+  margin:20px auto 10px;
+  background:rgba(20,5,30,0.65);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  padding:20px 24px;
+  border-radius:18px;
+  border:1px solid rgba(236,72,153,0.3);
+  box-shadow:0 0 40px rgba(236,72,153,0.2),inset 0 0 20px rgba(236,72,153,0.05);
+  font-size:14px;
+  line-height:1.65;
+  color:#fce7f3;
+  font-weight:300;
+}
+.historia::before{
+  content:"❝";
+  display:block;
+  font-family:'Cinzel',serif;
+  font-size:42px;
+  color:var(--rosa);
+  line-height:0.4;
+  margin-bottom:6px;
+  opacity:0.6;
+}
+.dicas{
+  max-width:540px;
+  margin:14px auto 0;
+  text-align:left;
+  background:rgba(20,5,30,0.5);
+  border:1px dashed rgba(250,204,21,0.4);
+  border-radius:14px;
+  padding:14px 20px;
+  font-size:13px;
+  color:#fef3c7;
+  line-height:1.7;
+}
+.dicas b{ color:var(--dourado); letter-spacing:1px; }
+
+.btn-comecar{
+  margin-top:24px;
+  padding:14px 36px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(90deg,var(--rosa-escuro),var(--rosa));
+  color:white;
+  font-size:15px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  letter-spacing:1px;
+  cursor:pointer;
+  text-transform:uppercase;
+  box-shadow:0 8px 30px -8px rgba(236,72,153,0.7);
+  transition:all 0.3s;
+}
+.btn-comecar:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px -8px rgba(236,72,153,0.9);
+}
+
+.voltar{
+  position:fixed;
+  top:16px;
+  left:16px;
+  padding:10px 16px;
+  background:rgba(20,5,30,0.7);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(236,72,153,0.4);
+  color:var(--rosa-claro);
+  border-radius:12px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:500;
+  z-index:50;
+  font-family:'Inter',sans-serif;
+  transition:all 0.3s;
+}
+.voltar:hover{
+  background:rgba(236,72,153,0.2);
+  color:white;
+}
+
+/* GAME */
+#game{
+  display:none;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  height:100dvh;
+}
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+  background:radial-gradient(ellipse at center,#3b0764 0%,#1e1b4b 100%);
+  touch-action:none;
+  cursor:crosshair;
+}
+
+/* HUDs */
+.hud-top{
+  position:absolute;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  z-index:10;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.hud-pill{
+  background:rgba(20,5,30,0.78);
+  backdrop-filter:blur(10px);
+  padding:8px 16px;
+  border-radius:30px;
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  letter-spacing:1.5px;
+  border:1px solid rgba(236,72,153,0.3);
+  color:var(--rosa-claro);
+}
+.hud-pill.tempo{ color:#fef08a; border-color:rgba(250,204,21,0.4); }
+.hud-pill.vidas{ color:#fca5a5; border-color:rgba(239,68,68,0.4); }
+
+/* dicas no jogo */
+.dicas-jogo{
+  position:absolute;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(20,5,30,0.78);
+  backdrop-filter:blur(10px);
+  padding:10px 18px;
+  border-radius:14px;
+  border:1px solid rgba(250,204,21,0.4);
+  font-size:12px;
+  color:#fef3c7;
+  z-index:10;
+  text-align:center;
+  max-width:90vw;
+  line-height:1.5;
+}
+.dicas-jogo b{ color:var(--dourado); letter-spacing:1px; }
+
+/* feedback central */
+.feedback{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Cinzel',serif;
+  font-size:48px;
+  font-weight:700;
+  letter-spacing:4px;
+  pointer-events:none;
+  z-index:20;
+  text-shadow:0 0 30px currentColor;
+  animation:fbPop 0.6s ease;
+}
+@keyframes fbPop{
+  0%{ transform:translate(-50%,-50%) scale(0.4); opacity:0; }
+  30%{ transform:translate(-50%,-50%) scale(1.2); opacity:1; }
+  100%{ transform:translate(-50%,-50%) scale(1); opacity:0; }
+}
+
+/* OVERLAY game over */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:100;
+  color:white;
+  text-align:center;
+  padding:20px;
+  animation:fadeIn 0.4s ease;
+}
+.overlay.show{ display:flex; }
+.overlay h2{
+  font-family:'Cinzel',serif;
+  font-size:36px;
+  margin:10px;
+  background:linear-gradient(90deg,#fbcfe8,#ec4899);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.overlay p{ color:#fce7f3; margin-bottom:16px; font-size:16px; }
+.overlay button{
+  margin:8px;
+  padding:14px 28px;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,var(--rosa-escuro),var(--rosa));
+  border:none;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 20px -5px rgba(236,72,153,0.6);
+  transition:transform 0.2s;
+}
+.overlay button:hover{ transform:translateY(-2px); }
+
+/* MOBILE */
+@media (max-width:600px){
+  .voltar{ top:8px; left:8px; padding:7px 12px; font-size:11px; }
+  .hud-top{ top:50px; gap:6px; }
+  .hud-pill{ padding:6px 12px; font-size:11px; letter-spacing:1px; }
+  .dicas-jogo{ font-size:11px; padding:8px 12px; bottom:10px; }
+  .feedback{ font-size:36px; }
+  .historia{ font-size:13px; padding:16px 18px; }
+  .boto-emoji{ font-size:90px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PARTÍCULAS / VAGALUMES -->
+<div class="particles" id="particles"></div>
+
+<!-- BOTÃO VOLTAR -->
+<button class="voltar" onclick="voltar()">← Menu</button>
+
+<!-- MENU -->
+<div id="menu" class="tela">
+  <div class="badge">✦ Lenda Amazônica ✦</div>
+  <h1 class="titulo">🐬 Boto na Festa</h1>
+
+  <div class="boto-emoji">🐬</div>
+
+  <div class="historia">
+    Diz a lenda que nas noites de festa junina à beira do rio, o Boto cor-de-rosa
+    sai das águas e se transforma em um homem charmoso, com chapéu branco, vestido de gala.
+    Ele encanta as moças e some na água antes do amanhecer. Você consegue identificá-lo
+    no meio da festa?
+  </div>
+
+  <div class="dicas">
+    <b>🔍 PISTAS</b><br>
+    • O Boto <b>nunca tira o chapéu branco</b> (esconde o furo da cabeça)<br>
+    • Tem uma <b>aura rosada</b> sutil ao redor<br>
+    • Deixa <b>pingos d'água</b> caindo dele<br>
+    • Sempre encara as moças com vestido
+  </div>
+
+  <button class="btn-comecar" onclick="start()">Começar Festa</button>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <canvas id="c"></canvas>
+
+  <div class="hud-top">
+    <div class="hud-pill">🎯 RODADA <span id="rodada">1</span></div>
+    <div class="hud-pill">🏆 <span id="pontos">0</span></div>
+    <div class="hud-pill tempo">⏱️ <span id="tempo">30</span>s</div>
+    <div class="hud-pill vidas">❤️ <span id="vidas">3</span></div>
+  </div>
+
+  <div class="dicas-jogo">
+    Toque no <b>Boto disfarçado</b> antes do tempo acabar
+  </div>
+
+  <div class="feedback" id="feedback" style="display:none"></div>
+</div>
+
+<!-- GAME OVER -->
+<div id="overlay" class="overlay">
+  <h2 id="goTitle">🐬 Festa encerrada!</h2>
+  <p>Pontuação final: <span id="finalScore">0</span></p>
+  <p>Rodadas vencidas: <span id="finalRodada">0</span></p>
+  <button onclick="reiniciar()">🔄 Tentar de novo</button>
+  <button onclick="voltar()">← Menu</button>
+</div>
+
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+
+let w, h;
+function resize(){
+  const vv = window.visualViewport;
+  w = Math.round(vv ? vv.width  : window.innerWidth);
+  h = Math.round(vv ? vv.height : window.innerHeight);
+  c.width = w; c.height = h;
+}
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", ()=>setTimeout(resize, 150));
+if(window.visualViewport) window.visualViewport.addEventListener("resize", resize);
+
+// estado
+const FPS = 60;
+let pessoas = [];
+let rodada = 1;
+let pontos = 0;
+let vidas = 3;
+let tempo = 30;        // segundos restantes
+let tempoFrame = 0;    // ticks do segundo atual
+let gameOver = false;
+let rodando = false;
+let tick = 0;
+let rodadaAtiva = false;
+
+// =========================
+// MODELO DE PESSOA (festeiro ou boto disfarçado)
+// =========================
+function novaPessoa(isBoto){
+  // cores dos personagens (homens da festa)
+  const corChapeu = isBoto ? "#fafafa" :
+    ["#7c2d12","#1e3a8a","#854d0e","#1f2937","#5b21b6","#b91c1c"][Math.floor(Math.random()*6)];
+  const corCamisa = isBoto ? "#dbeafe" :
+    ["#dc2626","#16a34a","#1d4ed8","#ea580c","#7e22ce","#ca8a04","#0891b2"][Math.floor(Math.random()*7)];
+  const corCalca = ["#1c1917","#451a03","#0c4a6e","#365314"][Math.floor(Math.random()*4)];
+  const corPele = ["#fde68a","#fbbf24","#a16207","#78350f"][Math.floor(Math.random()*4)];
+
+  return {
+    x: 80 + Math.random()*(w - 160),
+    y: 140 + Math.random()*(h - 280),
+    dirAngle: Math.random()*Math.PI*2,
+    speed: 0.4 + Math.random()*0.5,
+    bobOffset: Math.random()*Math.PI*2,
+    isBoto: !!isBoto,
+    corChapeu, corCamisa, corCalca, corPele,
+    /* outros podem perder o chapéu por alguns frames pra dica */
+    chapeuVisivel: true,
+    proximaTroca: 60 + Math.random()*240,
+    /* outros são "moças" às vezes */
+    eMulher: !isBoto && Math.random() < 0.35,
+    /* timer pra trocar direção */
+    proximaDir: 60 + Math.random()*120,
+    /* gota d'água do boto */
+    proximaGota: 30 + Math.random()*60
+  };
+}
+
+// =========================
+// SETUP DA RODADA
+// =========================
+function novaRodada(){
+  pessoas = [];
+  rodadaAtiva = true;
+  // dificuldade: rodada 1 = 6 pessoas, +1 por rodada (até 14)
+  const total = Math.min(6 + (rodada - 1), 14);
+  // 1 boto + (total-1) festeiros
+  pessoas.push(novaPessoa(true));
+  for(let i = 1; i < total; i++) pessoas.push(novaPessoa(false));
+  // embaralha array pra não saber qual é o primeiro
+  pessoas.sort(()=>Math.random() - 0.5);
+
+  // tempo: rodada 1 = 30s, -2s por rodada (mínimo 14s)
+  tempo = Math.max(14, 30 - (rodada - 1)*2);
+  tempoFrame = 0;
+
+  document.getElementById("rodada").innerText = rodada;
+  document.getElementById("tempo").innerText = tempo;
+}
+
+function start(){
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  resize();
+  rodada = 1;
+  pontos = 0;
+  vidas = 3;
+  gameOver = false;
+  document.getElementById("pontos").innerText = pontos;
+  document.getElementById("vidas").innerText = vidas;
+  document.getElementById("overlay").classList.remove("show");
+  novaRodada();
+  if(!rodando){ rodando = true; loop(); }
+}
+
+function reiniciar(){ start(); }
+function voltar(){ window.location.href = "index.html"; }
+
+// =========================
+// CLIQUE — descobrir o boto
+// =========================
+function clicar(cx, cy){
+  if(!rodadaAtiva || gameOver) return;
+  // procura a pessoa mais próxima do clique (raio ~28px)
+  let melhor = null, melhorD = 35;
+  for(const p of pessoas){
+    const d = Math.hypot(p.x - cx, p.y - cy);
+    if(d < melhorD){ melhorD = d; melhor = p; }
+  }
+  if(!melhor) return;
+
+  if(melhor.isBoto){
+    acertou(melhor);
+  } else {
+    errou(melhor);
+  }
+}
+
+function acertou(boto){
+  rodadaAtiva = false;
+  // bônus por tempo restante
+  const bonus = Math.round(tempo * 10);
+  pontos += 100 + bonus;
+  document.getElementById("pontos").innerText = pontos;
+  showFeedback("ENCONTROU!", "#22d3ee");
+  // animação de "transformação" rápida — vira boto e vai pra água
+  boto.transformando = true;
+  boto.transformTime = 0;
+  // próxima rodada
+  setTimeout(()=>{
+    rodada++;
+    novaRodada();
+  }, 1600);
+}
+
+function errou(p){
+  vidas--;
+  document.getElementById("vidas").innerText = vidas;
+  showFeedback("ERROU!", "#fca5a5");
+  // efeito visual de "irritação" na pessoa errada
+  p.indignado = 30;
+  if(vidas <= 0){
+    perderJogo();
+  }
+}
+
+function tempoEsgotou(){
+  vidas--;
+  document.getElementById("vidas").innerText = vidas;
+  showFeedback("TEMPO!", "#facc15");
+  if(vidas <= 0){ perderJogo(); }
+  else {
+    rodadaAtiva = false;
+    setTimeout(()=>{ novaRodada(); }, 1600);
+  }
+}
+
+function perderJogo(){
+  gameOver = true;
+  rodadaAtiva = false;
+  document.getElementById("finalScore").innerText = pontos;
+  document.getElementById("finalRodada").innerText = rodada;
+  document.getElementById("goTitle").innerText = "🐬 O Boto escapou!";
+  setTimeout(()=>document.getElementById("overlay").classList.add("show"), 600);
+}
+
+function showFeedback(text, color){
+  const fb = document.getElementById("feedback");
+  fb.style.display = "block";
+  fb.style.color = color;
+  fb.textContent = text;
+  fb.style.animation = "none";
+  void fb.offsetWidth;
+  fb.style.animation = "fbPop 0.6s ease";
+  setTimeout(()=>{
+    if(fb.textContent === text) fb.style.display = "none";
+  }, 600);
+}
+
+// =========================
+// CLIQUE no canvas
+// =========================
+function onClick(e){
+  e.preventDefault();
+  const rect = c.getBoundingClientRect();
+  let cx, cy;
+  if(e.touches && e.touches.length){
+    cx = e.touches[0].clientX - rect.left;
+    cy = e.touches[0].clientY - rect.top;
+  } else if(e.changedTouches && e.changedTouches.length){
+    cx = e.changedTouches[0].clientX - rect.left;
+    cy = e.changedTouches[0].clientY - rect.top;
+  } else {
+    cx = e.clientX - rect.left;
+    cy = e.clientY - rect.top;
+  }
+  clicar(cx, cy);
+}
+c.addEventListener("click", onClick);
+c.addEventListener("touchstart", onClick, {passive:false});
+
+// =========================
+// UPDATE
+// =========================
+function update(){
+  if(!rodadaAtiva || gameOver) return;
+  tick++;
+  tempoFrame++;
+  if(tempoFrame >= FPS){
+    tempoFrame = 0;
+    tempo--;
+    document.getElementById("tempo").innerText = tempo;
+    if(tempo <= 0){ tempoEsgotou(); return; }
+  }
+
+  for(const p of pessoas){
+    if(p.transformando){
+      p.transformTime++;
+      continue;
+    }
+    // troca direção ocasional
+    p.proximaDir--;
+    if(p.proximaDir <= 0){
+      p.dirAngle = Math.random()*Math.PI*2;
+      p.speed = 0.3 + Math.random()*0.6;
+      p.proximaDir = 80 + Math.random()*150;
+    }
+    // anda
+    p.x += Math.cos(p.dirAngle) * p.speed;
+    p.y += Math.sin(p.dirAngle) * p.speed;
+    // salta nas bordas
+    if(p.x < 50){ p.x = 50; p.dirAngle = Math.PI - p.dirAngle; }
+    if(p.x > w - 50){ p.x = w - 50; p.dirAngle = Math.PI - p.dirAngle; }
+    if(p.y < 130){ p.y = 130; p.dirAngle = -p.dirAngle; }
+    if(p.y > h - 90){ p.y = h - 90; p.dirAngle = -p.dirAngle; }
+
+    // outros personagens trocam visibilidade do chapéu — nunca o boto
+    if(!p.isBoto){
+      p.proximaTroca--;
+      if(p.proximaTroca <= 0){
+        p.chapeuVisivel = !p.chapeuVisivel;
+        p.proximaTroca = 90 + Math.random()*240;
+      }
+    }
+
+    // boto: gota d'água ocasional
+    if(p.isBoto){
+      p.proximaGota--;
+      if(p.proximaGota <= 0){
+        p.gotaY = 0;
+        p.proximaGota = 80 + Math.random()*100;
+      }
+      if(p.gotaY != null){
+        p.gotaY += 1.5;
+        if(p.gotaY > 50) p.gotaY = null;
+      }
+    }
+
+    // contador de irritação
+    if(p.indignado != null && p.indignado > 0) p.indignado--;
+  }
+}
+
+// =========================
+// DESENHO DO CENÁRIO (festa junina)
+// =========================
+function drawCenario(){
+  // chão de terra
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, "#3b0764");
+  grad.addColorStop(0.4, "#581c87");
+  grad.addColorStop(1, "#7c2d12");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 100, w, h-100);
+
+  // riacho/borda do rio acima
+  const rioGrad = ctx.createLinearGradient(0, 0, 0, 130);
+  rioGrad.addColorStop(0, "#0f172a");
+  rioGrad.addColorStop(1, "#0c4a6e");
+  ctx.fillStyle = rioGrad;
+  ctx.fillRect(0, 0, w, 130);
+  // ondulações na água
+  for(let i=0;i<3;i++){
+    ctx.strokeStyle = `rgba(165,243,252,${0.15 - i*0.04})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let x=0; x<=w; x+=8){
+      const y = 110 + Math.sin((x + tick*1.5 + i*30)*0.025)*3 - i*4;
+      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // bandeirinhas no topo da festa
+  const bandeiraColors = ["#ef4444","#facc15","#22c55e","#3b82f6","#a855f7","#fb923c"];
+  for(let i=0; i<Math.ceil(w/40)+1; i++){
+    const bx = i*40;
+    const by = 138 + Math.sin(tick*0.05 + i*0.5)*3;
+    ctx.fillStyle = bandeiraColors[i % bandeiraColors.length];
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(bx + 16, by);
+    ctx.lineTo(bx + 8, by + 16);
+    ctx.closePath();
+    ctx.fill();
+    // cordão
+    if(i < Math.ceil(w/40)){
+      ctx.strokeStyle = "rgba(254,215,170,0.5)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(bx + 8, by - 1);
+      ctx.lineTo(bx + 48, 138 + Math.sin(tick*0.05 + (i+1)*0.5)*3 - 1);
+      ctx.stroke();
+    }
+  }
+
+  // FOGUEIRA central
+  const fcx = w/2, fcy = h*0.55;
+  // brasas
+  for(let i=0;i<6;i++){
+    const ang = (i/6)*Math.PI*2 + tick*0.05;
+    const px = fcx + Math.cos(ang)*22;
+    const py = fcy + 18 + Math.sin(ang)*4;
+    ctx.fillStyle = "#451a03";
+    ctx.fillRect(px-6, py, 12, 4);
+  }
+  // chamas pulsantes
+  ctx.shadowBlur = 30;
+  ctx.shadowColor = "#fb923c";
+  for(let i=0;i<3;i++){
+    const wob = Math.sin(tick*0.2 + i)*4;
+    const fg = ctx.createRadialGradient(fcx + wob, fcy - 10 - i*8, 1, fcx + wob, fcy, 24 - i*4);
+    fg.addColorStop(0, "#fef9c3");
+    fg.addColorStop(0.4, "#fbbf24");
+    fg.addColorStop(0.8, "#dc2626");
+    fg.addColorStop(1, "rgba(127,29,29,0)");
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.ellipse(fcx + wob, fcy - 4 - i*5, 18 - i*3, 28 - i*5, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+
+  // luz da fogueira no chão (anel claro)
+  const lg = ctx.createRadialGradient(fcx, fcy, 30, fcx, fcy, 200);
+  lg.addColorStop(0, "rgba(251,146,60,0.18)");
+  lg.addColorStop(1, "rgba(251,146,60,0)");
+  ctx.fillStyle = lg;
+  ctx.fillRect(0, 100, w, h-100);
+}
+
+// =========================
+// DESENHO DAS PESSOAS
+// =========================
+function drawPessoa(p){
+  const px = p.x;
+  const py = p.y;
+  const bob = Math.sin(tick*0.15 + p.bobOffset)*1.2;
+
+  // sombra
+  ctx.fillStyle = "rgba(0,0,0,0.4)";
+  ctx.beginPath();
+  ctx.ellipse(px, py + 26, 11, 3, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // aura rosada do boto (sutil mas perceptível)
+  if(p.isBoto && !p.transformando){
+    ctx.shadowBlur = 22;
+    ctx.shadowColor = "#ec4899";
+    ctx.fillStyle = `rgba(236,72,153,${0.10 + Math.sin(tick*0.1)*0.04})`;
+    ctx.beginPath();
+    ctx.arc(px, py, 26, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // anel vermelho de "indignado" se errou nele
+  if(p.indignado != null && p.indignado > 0){
+    const a = p.indignado / 30;
+    ctx.strokeStyle = `rgba(239,68,68,${a})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(px, py, 22 + (1-a)*10, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // pernas
+  ctx.fillStyle = p.corCalca;
+  ctx.fillRect(px - 5, py + 8 + bob, 4, 14);
+  ctx.fillRect(px + 1, py + 8 + bob, 4, 14);
+  // sapato
+  ctx.fillStyle = "#0c0a09";
+  ctx.fillRect(px - 6, py + 21 + bob, 5, 2);
+  ctx.fillRect(px + 1, py + 21 + bob, 5, 2);
+
+  // corpo (camisa/vestido)
+  if(p.eMulher){
+    // vestido em A
+    ctx.fillStyle = p.corCamisa;
+    ctx.beginPath();
+    ctx.moveTo(px - 8, py - 4 + bob);
+    ctx.lineTo(px + 8, py - 4 + bob);
+    ctx.lineTo(px + 12, py + 12 + bob);
+    ctx.lineTo(px - 12, py + 12 + bob);
+    ctx.closePath();
+    ctx.fill();
+    // detalhes do vestido
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    for(let i=-1;i<=1;i++){
+      ctx.beginPath();
+      ctx.arc(px + i*4, py + 6 + bob, 1, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } else {
+    // camisa quadrada (homem)
+    ctx.fillStyle = p.corCamisa;
+    ctx.fillRect(px - 8, py - 4 + bob, 16, 14);
+    // detalhe quadriculado (xadrez de festa junina)
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    for(let i=0;i<2;i++){
+      for(let j=0;j<3;j++){
+        if((i+j)%2 === 0){
+          ctx.fillRect(px - 8 + i*8, py - 4 + j*5 + bob, 8, 5);
+        }
+      }
+    }
+  }
+
+  // pescoço
+  ctx.fillStyle = p.corPele;
+  ctx.fillRect(px - 2, py - 7 + bob, 4, 4);
+
+  // cabeça
+  ctx.fillStyle = p.corPele;
+  ctx.beginPath();
+  ctx.arc(px, py - 12 + bob, 7, 0, Math.PI*2);
+  ctx.fill();
+
+  // olhos
+  ctx.fillStyle = "#1c1917";
+  ctx.fillRect(px - 3, py - 13 + bob, 1.5, 1.5);
+  ctx.fillRect(px + 1.5, py - 13 + bob, 1.5, 1.5);
+  // sorriso
+  ctx.strokeStyle = "#1c1917";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(px, py - 10 + bob, 2, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  // CHAPÉU
+  if(p.eMulher){
+    // chapéu/laço de moça (laço grande colorido)
+    ctx.fillStyle = "#dc2626";
+    ctx.beginPath();
+    ctx.moveTo(px - 6, py - 17 + bob);
+    ctx.lineTo(px + 6, py - 17 + bob);
+    ctx.lineTo(px, py - 23 + bob);
+    ctx.closePath();
+    ctx.fill();
+  } else if(p.chapeuVisivel || p.isBoto){
+    if(p.isBoto){
+      // chapéu branco característico do boto, com brilho rosado
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = "#fbcfe8";
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(px - 9, py - 18 + bob, 18, 3);
+      ctx.fillRect(px - 6, py - 24 + bob, 12, 6);
+      ctx.shadowBlur = 0;
+      // fita do chapéu (rosa claro)
+      ctx.fillStyle = "#fbcfe8";
+      ctx.fillRect(px - 6, py - 19 + bob, 12, 1.5);
+    } else {
+      // chapéu de palha tradicional
+      ctx.fillStyle = p.corChapeu;
+      ctx.fillRect(px - 9, py - 18 + bob, 18, 3);
+      ctx.fillRect(px - 6, py - 23 + bob, 12, 5);
+    }
+  }
+
+  // pingo d'água caindo (só do boto)
+  if(p.isBoto && p.gotaY != null){
+    ctx.fillStyle = "rgba(165,243,252,0.85)";
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = "#22d3ee";
+    ctx.beginPath();
+    ctx.moveTo(px + 8, py - 3 + bob + p.gotaY);
+    ctx.bezierCurveTo(px + 10, py + 1 + bob + p.gotaY, px + 10, py + 4 + bob + p.gotaY, px + 8, py + 5 + bob + p.gotaY);
+    ctx.bezierCurveTo(px + 6, py + 4 + bob + p.gotaY, px + 6, py + 1 + bob + p.gotaY, px + 8, py - 3 + bob + p.gotaY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // efeito de transformação após acerto
+  if(p.transformando){
+    const t = p.transformTime / 60;     // 0 → 1
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = "#ec4899";
+    ctx.fillStyle = `rgba(236,72,153,${1 - t})`;
+    ctx.beginPath();
+    ctx.arc(px, py, 30 + t*30, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // emoji boto
+    ctx.font = `${30 + t*20}px Arial`;
+    ctx.textAlign = "center";
+    ctx.fillText("🐬", px, py + 10 - t*60);
+    ctx.textAlign = "start";
+  }
+}
+
+// =========================
+// DESENHO PRINCIPAL
+// =========================
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  drawCenario();
+  // ordena pessoas pelo Y pra dar profundidade
+  const ordenadas = [...pessoas].sort((a,b)=>a.y - b.y);
+  for(const p of ordenadas) drawPessoa(p);
+}
+
+// =========================
+// LOOP
+// =========================
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// =========================
+// VAGALUMES (DOM)
+// =========================
+const ff = document.getElementById("particles");
+for(let i=0;i<25;i++){
+  const f = document.createElement("div");
+  f.className = "firefly";
+  f.style.left = Math.random()*100 + "%";
+  f.style.top = (40 + Math.random()*60) + "%";
+  f.style.animationDuration = (5 + Math.random()*7) + "s";
+  f.style.animationDelay = Math.random()*8 + "s";
+  ff.appendChild(f);
+}
+
+resize();
+</script>
+
+</body>
+</html>
