@@ -375,6 +375,18 @@ footer{
   .destaque{ padding:24px; }
   .destaque-emoji{ font-size:48px; }
 }
+
+/* === OTIMIZACAO MOBILE === */
+@media (max-width: 900px), (pointer: coarse){
+  /* backdrop-filter custa muito em GPU mobile */
+  header, .card{ backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  /* drop-shadow nos icones forca recomposicao */
+  .logo-icon, .card-emoji, .destaque-emoji{ filter: none !important; }
+  /* sombras animadas reduzidas */
+  .destaque::before{ animation: none !important; }
+  .card{ transition: transform 0.2s !important; }
+  .card:hover{ box-shadow: 0 8px 24px -10px rgba(0,0,0,.4) !important; }
+}
 </style>
 </head>
 
@@ -480,10 +492,12 @@ function ir(jogo){
   setTimeout(()=>{ window.location.href = jogo + ".html"; }, 250);
 }
 
-// Partículas: folhas caindo
+// Partículas: folhas caindo (reduzidas em mobile para economizar bateria/CPU)
 const particles = document.getElementById("particles");
 const leaves = ["🍃","🌿","🍂"];
-for(let i=0; i<18; i++){
+const IS_MOBILE = window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
+const QTD_FOLHAS = IS_MOBILE ? 6 : 18;
+for(let i=0; i<QTD_FOLHAS; i++){
   const leaf = document.createElement("div");
   leaf.className = "leaf";
   leaf.textContent = leaves[Math.floor(Math.random()*leaves.length)];

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Lenda do Boto Cor-de-Rosa</title>
+<title>Lenda do Boto Cor-de-Rosa · Party</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,7 @@
   --rosa-escuro:#9d174d;
   --dourado:#facc15;
   --terra:#7c2d12;
+  --vermelho:#dc2626;
 }
 
 html, body{
@@ -41,28 +42,6 @@ body{
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
   overflow-y:auto;
-}
-
-/* PARTÍCULAS — vagalumes da festa */
-.particles{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:1;
-  overflow:hidden;
-}
-.firefly{
-  position:absolute;
-  width:5px; height:5px;
-  background:radial-gradient(circle,#fef9c3,#fbbf24 50%,transparent 80%);
-  border-radius:50%;
-  box-shadow:0 0 12px #facc15;
-  animation:float linear infinite;
-}
-@keyframes float{
-  0%{ transform:translate(0,0); opacity:0; }
-  10%{ opacity:1; }
-  100%{ transform:translate(60px,-200px); opacity:0; }
 }
 
 /* MENU */
@@ -130,16 +109,6 @@ h1.titulo{
   line-height:1.65;
   color:#fce7f3;
   font-weight:300;
-}
-.historia::before{
-  content:"❝";
-  display:block;
-  font-family:'Cinzel',serif;
-  font-size:42px;
-  color:var(--rosa);
-  line-height:0.4;
-  margin-bottom:6px;
-  opacity:0.6;
 }
 .dicas{
   max-width:540px;
@@ -211,7 +180,6 @@ canvas{
   width:100%;
   height:100%;
   display:block;
-  background:radial-gradient(ellipse at center,#3b0764 0%,#1e1b4b 100%);
   touch-action:none;
   cursor:crosshair;
 }
@@ -227,6 +195,7 @@ canvas{
   z-index:10;
   flex-wrap:wrap;
   justify-content:center;
+  align-items:center;
 }
 .hud-pill{
   background:rgba(20,5,30,0.78);
@@ -238,9 +207,68 @@ canvas{
   letter-spacing:1.5px;
   border:1px solid rgba(236,72,153,0.3);
   color:var(--rosa-claro);
+  white-space:nowrap;
 }
-.hud-pill.tempo{ color:#fef08a; border-color:rgba(250,204,21,0.4); }
-.hud-pill.vidas{ color:#fca5a5; border-color:rgba(239,68,68,0.4); }
+
+/* Barra de suspeita */
+.susp-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(20,5,30,0.78);
+  backdrop-filter:blur(10px);
+  padding:6px 14px;
+  border-radius:30px;
+  border:1px solid rgba(220,38,38,0.4);
+}
+.susp-label{
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:1.5px;
+  color:#fca5a5;
+}
+.susp-bar{
+  width:120px;
+  height:8px;
+  background:rgba(0,0,0,0.5);
+  border-radius:6px;
+  overflow:hidden;
+  border:1px solid rgba(220,38,38,0.3);
+}
+.susp-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#facc15,#fb923c,#dc2626);
+  transition:width 0.2s;
+  border-radius:6px;
+}
+.susp-fill.alta{ animation:pulseRed 0.6s ease-in-out infinite; }
+@keyframes pulseRed{
+  0%,100%{ box-shadow:0 0 4px #dc2626; }
+  50%{ box-shadow:0 0 14px #ef4444; }
+}
+
+/* feedback central */
+.feedback{
+  position:absolute;
+  top:35%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Cinzel',serif;
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:3px;
+  pointer-events:none;
+  z-index:20;
+  text-shadow:0 0 30px currentColor;
+  animation:fbPop 0.8s ease forwards;
+}
+@keyframes fbPop{
+  0%{ transform:translate(-50%,-50%) scale(0.4); opacity:0; }
+  20%{ transform:translate(-50%,-50%) scale(1.15); opacity:1; }
+  80%{ opacity:1; }
+  100%{ transform:translate(-50%,-50%) scale(1); opacity:0; }
+}
 
 /* dicas no jogo */
 .dicas-jogo{
@@ -250,37 +278,80 @@ canvas{
   transform:translateX(-50%);
   background:rgba(20,5,30,0.78);
   backdrop-filter:blur(10px);
-  padding:10px 18px;
+  padding:8px 16px;
   border-radius:14px;
   border:1px solid rgba(250,204,21,0.4);
-  font-size:12px;
+  font-size:11px;
   color:#fef3c7;
   z-index:10;
   text-align:center;
   max-width:90vw;
   line-height:1.5;
+  letter-spacing:0.5px;
 }
 .dicas-jogo b{ color:var(--dourado); letter-spacing:1px; }
 
-/* feedback central */
-.feedback{
+/* D-PAD */
+.dpad{
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-family:'Cinzel',serif;
-  font-size:48px;
-  font-weight:700;
-  letter-spacing:4px;
-  pointer-events:none;
-  z-index:20;
-  text-shadow:0 0 30px currentColor;
-  animation:fbPop 0.6s ease;
+  bottom:30px;
+  left:20px;
+  display:none;
+  grid-template-columns:48px 48px 48px;
+  grid-template-rows:48px 48px 48px;
+  gap:4px;
+  z-index:30;
+  touch-action:none;
 }
-@keyframes fbPop{
-  0%{ transform:translate(-50%,-50%) scale(0.4); opacity:0; }
-  30%{ transform:translate(-50%,-50%) scale(1.2); opacity:1; }
-  100%{ transform:translate(-50%,-50%) scale(1); opacity:0; }
+.dpad button{
+  background:rgba(20,5,30,0.7);
+  border:1px solid rgba(236,72,153,0.4);
+  color:white;
+  border-radius:10px;
+  font-size:18px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:none;
+}
+.dpad button:active{ background:rgba(236,72,153,0.4); }
+.dpad .up   { grid-area:1/2/2/3; }
+.dpad .left { grid-area:2/1/3/2; }
+.dpad .right{ grid-area:2/3/3/4; }
+.dpad .down { grid-area:3/2/4/3; }
+
+/* BOTÃO DE AÇÃO */
+.acao-btn{
+  position:absolute;
+  bottom:36px;
+  right:24px;
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ec4899,#9d174d);
+  border:2px solid rgba(255,255,255,0.4);
+  color:white;
+  font-size:34px;
+  cursor:pointer;
+  z-index:30;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 6px 24px rgba(236,72,153,0.5);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:none;
+  transition:transform 0.1s;
+}
+.acao-btn:active{ transform:scale(0.92); }
+.acao-btn.cooling{
+  background:rgba(60,30,40,0.6);
+  border-color:rgba(120,80,90,0.4);
+}
+
+/* visível em mobile / touch */
+@media (pointer: coarse), (max-width: 900px){
+  .dpad{ display:grid; }
+  .acao-btn{ display:flex; }
+  .dicas-jogo{ display:none; }
 }
 
 /* OVERLAY game over */
@@ -309,7 +380,7 @@ canvas{
   background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-.overlay p{ color:#fce7f3; margin-bottom:16px; font-size:16px; }
+.overlay p{ color:#fce7f3; margin-bottom:8px; font-size:16px; }
 .overlay button{
   margin:8px;
   padding:14px 28px;
@@ -332,622 +403,802 @@ canvas{
   .voltar{ top:8px; left:8px; padding:7px 12px; font-size:11px; }
   .hud-top{ top:50px; gap:6px; }
   .hud-pill{ padding:6px 12px; font-size:11px; letter-spacing:1px; }
-  .dicas-jogo{ font-size:11px; padding:8px 12px; bottom:10px; }
-  .feedback{ font-size:36px; }
+  .susp-bar{ width:80px; height:7px; }
+  .susp-wrap{ padding:5px 10px; }
+  .susp-label{ font-size:10px; }
+  .feedback{ font-size:26px; }
   .historia{ font-size:13px; padding:16px 18px; }
   .boto-emoji{ font-size:90px; }
+  .acao-btn{ width:72px; height:72px; font-size:30px; bottom:24px; right:14px; }
+  .dpad{ grid-template-columns:42px 42px 42px; grid-template-rows:42px 42px 42px; bottom:20px; left:12px; }
+  .dpad button{ font-size:16px; }
+}
+
+/* === OTIMIZACAO MOBILE === */
+@media (max-width: 900px), (pointer: coarse){
+  *{ backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .titulo, .voltar, .hud-pill, .acao-btn, .dpad button{ filter: none !important; }
+  .btn-comecar{ box-shadow: 0 4px 12px rgba(0,0,0,.4) !important; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- PARTÍCULAS / VAGALUMES -->
-<div class="particles" id="particles"></div>
-
-<!-- BOTÃO VOLTAR -->
-<button class="voltar" onclick="voltar()">← Menu</button>
-
-<!-- MENU -->
+<!-- ===== MENU ===== -->
 <div id="menu" class="tela">
+  <button class="voltar" onclick="voltar()">← Menu</button>
   <div class="badge">✦ Lenda Amazônica ✦</div>
-  <h1 class="titulo">🐬 Boto na Festa</h1>
-
   <div class="boto-emoji">🐬</div>
-
+  <h1 class="titulo">Boto na Festa</h1>
   <div class="historia">
-    Diz a lenda que nas noites de festa junina à beira do rio, o Boto cor-de-rosa
-    sai das águas e se transforma em um homem charmoso, com chapéu branco, vestido de gala.
-    Ele encanta as moças e some na água antes do amanhecer. Você consegue identificá-lo
-    no meio da festa?
+    Você é o <b>Boto cor-de-rosa</b> em forma humana, infiltrado na festa
+    junina à beira do rio. Sua missão: <b>levar todos os festeiros embora</b>
+    sem ser desmascarado. Aproxime-se de alguém isolado e use a <b>AÇÃO</b>
+    para seduzir — fique parado até o golpe se completar. Mas se outro
+    festeiro estiver olhando, a <b>SUSPEITA</b> sobe... e os caçadores virão
+    atrás de você.
   </div>
-
   <div class="dicas">
-    <b>🔍 PISTAS</b><br>
-    • O Boto <b>nunca tira o chapéu branco</b> (esconde o furo da cabeça)<br>
-    • Tem uma <b>aura rosada</b> sutil ao redor<br>
-    • Deixa <b>pingos d'água</b> caindo dele<br>
-    • Sempre encara as moças com vestido
+    🎮 <b>WASD / Setas</b> para mover · <b>ESPAÇO</b> para seduzir<br>
+    📱 No mobile: D-pad e botão 💋<br>
+    👁️ Cuidado com o <b>raio de visão</b> dos festeiros (círculos rosa)<br>
+    🚨 Se a suspeita encher, <b>caçadores</b> virão te perseguir
   </div>
-
   <button class="btn-comecar" onclick="start()">Começar Festa</button>
 </div>
 
-<!-- GAME -->
+<!-- ===== GAME ===== -->
 <div id="game">
+  <button class="voltar" onclick="voltar()">← Menu</button>
   <canvas id="c"></canvas>
 
   <div class="hud-top">
-    <div class="hud-pill">🎯 RODADA <span id="rodada">1</span></div>
-    <div class="hud-pill">🏆 <span id="pontos">0</span></div>
-    <div class="hud-pill tempo">⏱️ <span id="tempo">30</span>s</div>
-    <div class="hud-pill vidas">❤️ <span id="vidas">3</span></div>
+    <div class="hud-pill">🐬 <span id="seduzidos">0</span>/<span id="meta">10</span></div>
+    <div class="susp-wrap">
+      <span class="susp-label">SUSPEITA</span>
+      <div class="susp-bar"><div class="susp-fill" id="suspFill"></div></div>
+    </div>
   </div>
 
   <div class="dicas-jogo">
-    Toque no <b>Boto disfarçado</b> antes do tempo acabar
+    <b>WASD/Setas</b> mover · <b>ESPAÇO</b> seduzir · não deixe ninguém ver
   </div>
 
-  <div class="feedback" id="feedback" style="display:none"></div>
+  <!-- D-PAD MOBILE -->
+  <div class="dpad">
+    <button class="up"    data-dir="up">⬆️</button>
+    <button class="left"  data-dir="left">⬅️</button>
+    <button class="right" data-dir="right">➡️</button>
+    <button class="down"  data-dir="down">⬇️</button>
+  </div>
+
+  <!-- BOTÃO DE AÇÃO MOBILE -->
+  <button class="acao-btn" id="acaoBtn" type="button">💋</button>
 </div>
 
-<!-- GAME OVER -->
+<!-- ===== GAME OVER ===== -->
 <div id="overlay" class="overlay">
   <h2 id="goTitle">🐬 Festa encerrada!</h2>
-  <p>Pontuação final: <span id="finalScore">0</span></p>
-  <p>Rodadas vencidas: <span id="finalRodada">0</span></p>
+  <p id="goMsg">Você foi descoberto!</p>
+  <p>Festeiros levados: <span id="finalScore">0</span>/<span id="finalMeta">10</span></p>
   <button onclick="reiniciar()">🔄 Tentar de novo</button>
   <button onclick="voltar()">← Menu</button>
 </div>
 
 <script>
+// ===== SETUP =====
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
+
+// === OTIMIZACAO MOBILE: desabilita shadowBlur (custa MUITO em GPU mobile) ===
+const IS_MOBILE = window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
+if(IS_MOBILE){
+  let _sb=0,_sc='transparent';
+  Object.defineProperty(ctx,'shadowBlur',{get:()=>_sb,set:v=>{_sb=0;}});
+  Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
+}
 
 let w, h;
 function resize(){
   const vv = window.visualViewport;
   w = Math.round(vv ? vv.width  : window.innerWidth);
   h = Math.round(vv ? vv.height : window.innerHeight);
-  c.width = w; c.height = h;
+  c.width=w; c.height=h;
 }
 window.addEventListener("resize", resize);
 window.addEventListener("orientationchange", ()=>setTimeout(resize, 150));
-if(window.visualViewport) window.visualViewport.addEventListener("resize", resize);
-
-// estado
-const FPS = 60;
-let pessoas = [];
-let rodada = 1;
-let pontos = 0;
-let vidas = 3;
-let tempo = 30;        // segundos restantes
-let tempoFrame = 0;    // ticks do segundo atual
-let gameOver = false;
-let rodando = false;
-let tick = 0;
-let rodadaAtiva = false;
-
-// =========================
-// MODELO DE PESSOA (festeiro ou boto disfarçado)
-// =========================
-function novaPessoa(isBoto){
-  // cores dos personagens (homens da festa)
-  const corChapeu = isBoto ? "#fafafa" :
-    ["#7c2d12","#1e3a8a","#854d0e","#1f2937","#5b21b6","#b91c1c"][Math.floor(Math.random()*6)];
-  const corCamisa = isBoto ? "#dbeafe" :
-    ["#dc2626","#16a34a","#1d4ed8","#ea580c","#7e22ce","#ca8a04","#0891b2"][Math.floor(Math.random()*7)];
-  const corCalca = ["#1c1917","#451a03","#0c4a6e","#365314"][Math.floor(Math.random()*4)];
-  const corPele = ["#fde68a","#fbbf24","#a16207","#78350f"][Math.floor(Math.random()*4)];
-
-  return {
-    x: 80 + Math.random()*(w - 160),
-    y: 140 + Math.random()*(h - 280),
-    dirAngle: Math.random()*Math.PI*2,
-    speed: 0.4 + Math.random()*0.5,
-    bobOffset: Math.random()*Math.PI*2,
-    isBoto: !!isBoto,
-    corChapeu, corCamisa, corCalca, corPele,
-    /* outros podem perder o chapéu por alguns frames pra dica */
-    chapeuVisivel: true,
-    proximaTroca: 60 + Math.random()*240,
-    /* outros são "moças" às vezes */
-    eMulher: !isBoto && Math.random() < 0.35,
-    /* timer pra trocar direção */
-    proximaDir: 60 + Math.random()*120,
-    /* gota d'água do boto */
-    proximaGota: 30 + Math.random()*60
-  };
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", resize);
 }
 
-// =========================
-// SETUP DA RODADA
-// =========================
-function novaRodada(){
-  pessoas = [];
-  rodadaAtiva = true;
-  // dificuldade: rodada 1 = 6 pessoas, +1 por rodada (até 14)
-  const total = Math.min(6 + (rodada - 1), 14);
-  // 1 boto + (total-1) festeiros
-  pessoas.push(novaPessoa(true));
-  for(let i = 1; i < total; i++) pessoas.push(novaPessoa(false));
-  // embaralha array pra não saber qual é o primeiro
-  pessoas.sort(()=>Math.random() - 0.5);
+// ===== CONSTANTES =====
+const META_FESTEIROS = 16;
+const SEDUCAO_TICKS  = 100;   // ~1.7s a 60fps
+const SUSP_MAX       = 100;
+const RAIO_ACAO      = 42;    // distância p/ seduzir
+const RAIO_VISAO_NPC = 55;    // raio em que NPC vê seduções (menor = mais stealth)
+const RAIO_TESTEMUNHA= 62;    // raio em que NPC vê o Boto antes da sedução começar
+const COR_FESTEIROS  = ["#fde68a","#fda4af","#a7f3d0","#bae6fd","#ddd6fe","#fed7aa","#fbcfe8","#bbf7d0"];
+const COR_PELE       = ["#fde68a","#f5d0a9","#d8a878","#b8865a","#8b5a3c","#5e3a23"];
+const COR_CABELO     = ["#1f2937","#451a03","#78350f","#a16207","#fbbf24","#475569"];
 
-  // tempo: rodada 1 = 30s, -2s por rodada (mínimo 14s)
-  tempo = Math.max(14, 30 - (rodada - 1)*2);
-  tempoFrame = 0;
+// ===== ESTADO =====
+let player, npcs, obstaculos, cacadores, particulas, feedbackEl;
+let seduzidos, suspeita, gameOver, vitoria, rodando, tick;
+let teclas = { up:false, down:false, left:false, right:false };
 
-  document.getElementById("rodada").innerText = rodada;
-  document.getElementById("tempo").innerText = tempo;
+// ===== CRIAÇÃO =====
+function criarObstaculos(){
+  obstaculos = [];
+  // PALCO no topo
+  obstaculos.push({x:w*0.5-80, y:50, w:160, h:48, tipo:'palco'});
+  // FOGUEIRA central
+  obstaculos.push({x:w*0.5-28, y:h*0.55-28, w:56, h:56, tipo:'fogueira'});
+  // MESAS espalhadas
+  obstaculos.push({x:w*0.18, y:h*0.32, w:70, h:44, tipo:'mesa'});
+  obstaculos.push({x:w*0.78, y:h*0.32, w:70, h:44, tipo:'mesa'});
+  obstaculos.push({x:w*0.22, y:h*0.72, w:70, h:44, tipo:'mesa'});
+  obstaculos.push({x:w*0.72, y:h*0.72, w:70, h:44, tipo:'mesa'});
+  // RIO no fundo (decorativo)
+  obstaculos.push({x:0, y:h-30, w:w, h:30, tipo:'rio'});
+}
+
+function criarFesteiros(){
+  npcs = [];
+  for(let i=0; i<META_FESTEIROS; i++){
+    let x, y, tries=0;
+    do{
+      x = 50 + Math.random()*(w-100);
+      y = 120 + Math.random()*(h-200);
+      tries++;
+    } while(tries < 30 && (colideObstaculo(x,y,18) || Math.hypot(x-player.x, y-player.y) < 100));
+    const a = Math.random()*Math.PI*2;
+    npcs.push({
+      x, y,
+      vx: Math.cos(a)*0.6,
+      vy: Math.sin(a)*0.6,
+      cor: COR_FESTEIROS[Math.floor(Math.random()*COR_FESTEIROS.length)],
+      pele: COR_PELE[Math.floor(Math.random()*COR_PELE.length)],
+      cabelo: COR_CABELO[Math.floor(Math.random()*COR_CABELO.length)],
+      estado: 'andando',          // andando | dancando | parado | panico
+      timerEstado: 60 + Math.random()*180,
+      vivo: true,
+      faceX: Math.cos(a),
+      faceY: Math.sin(a),
+      bobOffset: Math.random()*Math.PI*2,
+      alvoX: 0, alvoY: 0,
+      timerPanico: 0
+    });
+  }
+}
+
+function reset(){
+  player = {
+    x: w/2, y: h*0.85,
+    speed: 3.2,
+    seduzindo: null,
+    sedTimer: 0,
+    faceX: 0, faceY: -1,
+    moveX: 0, moveY: 0,
+    invuln: 0
+  };
+  cacadores = [];
+  particulas = [];
+  seduzidos = 0;
+  suspeita = 0;
+  gameOver = false;
+  vitoria = false;
+  tick = 0;
+  criarObstaculos();
+  criarFesteiros();
+
+  document.getElementById('seduzidos').innerText = seduzidos;
+  document.getElementById('meta').innerText = META_FESTEIROS;
+  document.getElementById('finalMeta').innerText = META_FESTEIROS;
+  atualizarSuspBar();
+  document.getElementById('overlay').classList.remove('show');
 }
 
 function start(){
   document.getElementById("menu").style.display = "none";
   document.getElementById("game").style.display = "block";
   resize();
-  rodada = 1;
-  pontos = 0;
-  vidas = 3;
-  gameOver = false;
-  document.getElementById("pontos").innerText = pontos;
-  document.getElementById("vidas").innerText = vidas;
-  document.getElementById("overlay").classList.remove("show");
-  novaRodada();
+  reset();
   if(!rodando){ rodando = true; loop(); }
 }
 
-function reiniciar(){ start(); }
 function voltar(){ window.location.href = "index.html"; }
+function reiniciar(){ reset(); }
 
-// =========================
-// CLIQUE — descobrir o boto
-// =========================
-function clicar(cx, cy){
-  if(!rodadaAtiva || gameOver) return;
-  // procura a pessoa mais próxima do clique (raio ~28px)
-  let melhor = null, melhorD = 35;
-  for(const p of pessoas){
-    const d = Math.hypot(p.x - cx, p.y - cy);
-    if(d < melhorD){ melhorD = d; melhor = p; }
+// ===== COLISÃO =====
+function colideObstaculo(x, y, raio){
+  for(const o of obstaculos){
+    if(o.tipo === 'rio') continue;
+    if(x + raio > o.x && x - raio < o.x + o.w &&
+       y + raio > o.y && y - raio < o.y + o.h) return true;
   }
-  if(!melhor) return;
-
-  if(melhor.isBoto){
-    acertou(melhor);
-  } else {
-    errou(melhor);
-  }
+  return false;
 }
 
-function acertou(boto){
-  rodadaAtiva = false;
-  // bônus por tempo restante
-  const bonus = Math.round(tempo * 10);
-  pontos += 100 + bonus;
-  document.getElementById("pontos").innerText = pontos;
-  showFeedback("ENCONTROU!", "#22d3ee");
-  // animação de "transformação" rápida — vira boto e vai pra água
-  boto.transformando = true;
-  boto.transformTime = 0;
-  // próxima rodada
-  setTimeout(()=>{
-    rodada++;
-    novaRodada();
-  }, 1600);
-}
-
-function errou(p){
-  vidas--;
-  document.getElementById("vidas").innerText = vidas;
-  showFeedback("ERROU!", "#fca5a5");
-  // efeito visual de "irritação" na pessoa errada
-  p.indignado = 30;
-  if(vidas <= 0){
-    perderJogo();
+function empurrarFora(ent, raio){
+  for(const o of obstaculos){
+    if(o.tipo === 'rio') continue;
+    if(ent.x + raio > o.x && ent.x - raio < o.x + o.w &&
+       ent.y + raio > o.y && ent.y - raio < o.y + o.h){
+      const cx = o.x + o.w/2, cy = o.y + o.h/2;
+      const dx = ent.x - cx, dy = ent.y - cy;
+      const px = (o.w/2 + raio) - Math.abs(dx);
+      const py = (o.h/2 + raio) - Math.abs(dy);
+      if(px < py){ ent.x += dx > 0 ? px : -px; }
+      else        { ent.y += dy > 0 ? py : -py; }
+    }
   }
 }
 
-function tempoEsgotou(){
-  vidas--;
-  document.getElementById("vidas").innerText = vidas;
-  showFeedback("TEMPO!", "#facc15");
-  if(vidas <= 0){ perderJogo(); }
-  else {
-    rodadaAtiva = false;
-    setTimeout(()=>{ novaRodada(); }, 1600);
+// ===== AÇÃO: TENTAR SEDUZIR =====
+function tentarSeduzir(){
+  if(player.seduzindo || gameOver || vitoria) return;
+  let alvo = null, melhorD = RAIO_ACAO;
+  for(const n of npcs){
+    if(!n.vivo || n.estado === 'panico') continue;
+    const d = Math.hypot(player.x - n.x, player.y - n.y);
+    if(d < melhorD){ melhorD = d; alvo = n; }
   }
-}
-
-function perderJogo(){
-  gameOver = true;
-  rodadaAtiva = false;
-  document.getElementById("finalScore").innerText = pontos;
-  document.getElementById("finalRodada").innerText = rodada;
-  document.getElementById("goTitle").innerText = "🐬 O Boto escapou!";
-  setTimeout(()=>document.getElementById("overlay").classList.add("show"), 600);
-}
-
-function showFeedback(text, color){
-  const fb = document.getElementById("feedback");
-  fb.style.display = "block";
-  fb.style.color = color;
-  fb.textContent = text;
-  fb.style.animation = "none";
-  void fb.offsetWidth;
-  fb.style.animation = "fbPop 0.6s ease";
-  setTimeout(()=>{
-    if(fb.textContent === text) fb.style.display = "none";
-  }, 600);
-}
-
-// =========================
-// CLIQUE no canvas
-// =========================
-function onClick(e){
-  e.preventDefault();
-  const rect = c.getBoundingClientRect();
-  let cx, cy;
-  if(e.touches && e.touches.length){
-    cx = e.touches[0].clientX - rect.left;
-    cy = e.touches[0].clientY - rect.top;
-  } else if(e.changedTouches && e.changedTouches.length){
-    cx = e.changedTouches[0].clientX - rect.left;
-    cy = e.changedTouches[0].clientY - rect.top;
-  } else {
-    cx = e.clientX - rect.left;
-    cy = e.clientY - rect.top;
+  if(!alvo){
+    flashFeedback('🤷 Ninguém perto', '#fbcfe8');
+    return;
   }
-  clicar(cx, cy);
+  // Verificar testemunhas
+  for(const n of npcs){
+    if(!n.vivo || n === alvo) continue;
+    const d = Math.hypot(player.x - n.x, player.y - n.y);
+    if(d < RAIO_TESTEMUNHA){
+      // alguém está perto → não pode começar
+      flashFeedback('👀 Alguém viu!', '#fca5a5');
+      suspeita = Math.min(SUSP_MAX, suspeita + 12);
+      atualizarSuspBar();
+      // o que viu fica suspeito brevemente
+      n.estado = 'parado';
+      n.timerEstado = 60;
+      return;
+    }
+  }
+  // Ok, começar sedução
+  player.seduzindo = alvo;
+  player.sedTimer  = 0;
+  alvo.vx = 0; alvo.vy = 0;
+  alvo.estado = 'parado';
+  alvo.timerEstado = SEDUCAO_TICKS + 30;
 }
-c.addEventListener("click", onClick);
-c.addEventListener("touchstart", onClick, {passive:false});
 
-// =========================
-// UPDATE
-// =========================
+// ===== UPDATE =====
 function update(){
-  if(!rodadaAtiva || gameOver) return;
   tick++;
-  tempoFrame++;
-  if(tempoFrame >= FPS){
-    tempoFrame = 0;
-    tempo--;
-    document.getElementById("tempo").innerText = tempo;
-    if(tempo <= 0){ tempoEsgotou(); return; }
+  // Movimento do player
+  let mx = 0, my = 0;
+  if(teclas.up)    my -= 1;
+  if(teclas.down)  my += 1;
+  if(teclas.left)  mx -= 1;
+  if(teclas.right) mx += 1;
+
+  if(player.seduzindo){
+    mx = 0; my = 0;
   }
 
-  for(const p of pessoas){
-    if(p.transformando){
-      p.transformTime++;
-      continue;
-    }
-    // troca direção ocasional
-    p.proximaDir--;
-    if(p.proximaDir <= 0){
-      p.dirAngle = Math.random()*Math.PI*2;
-      p.speed = 0.3 + Math.random()*0.6;
-      p.proximaDir = 80 + Math.random()*150;
-    }
-    // anda
-    p.x += Math.cos(p.dirAngle) * p.speed;
-    p.y += Math.sin(p.dirAngle) * p.speed;
-    // salta nas bordas
-    if(p.x < 50){ p.x = 50; p.dirAngle = Math.PI - p.dirAngle; }
-    if(p.x > w - 50){ p.x = w - 50; p.dirAngle = Math.PI - p.dirAngle; }
-    if(p.y < 130){ p.y = 130; p.dirAngle = -p.dirAngle; }
-    if(p.y > h - 90){ p.y = h - 90; p.dirAngle = -p.dirAngle; }
-
-    // outros personagens trocam visibilidade do chapéu — nunca o boto
-    if(!p.isBoto){
-      p.proximaTroca--;
-      if(p.proximaTroca <= 0){
-        p.chapeuVisivel = !p.chapeuVisivel;
-        p.proximaTroca = 90 + Math.random()*240;
-      }
-    }
-
-    // boto: gota d'água ocasional
-    if(p.isBoto){
-      p.proximaGota--;
-      if(p.proximaGota <= 0){
-        p.gotaY = 0;
-        p.proximaGota = 80 + Math.random()*100;
-      }
-      if(p.gotaY != null){
-        p.gotaY += 1.5;
-        if(p.gotaY > 50) p.gotaY = null;
-      }
-    }
-
-    // contador de irritação
-    if(p.indignado != null && p.indignado > 0) p.indignado--;
-  }
-}
-
-// =========================
-// DESENHO DO CENÁRIO (festa junina)
-// =========================
-function drawCenario(){
-  // chão de terra
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, "#3b0764");
-  grad.addColorStop(0.4, "#581c87");
-  grad.addColorStop(1, "#7c2d12");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 100, w, h-100);
-
-  // riacho/borda do rio acima
-  const rioGrad = ctx.createLinearGradient(0, 0, 0, 130);
-  rioGrad.addColorStop(0, "#0f172a");
-  rioGrad.addColorStop(1, "#0c4a6e");
-  ctx.fillStyle = rioGrad;
-  ctx.fillRect(0, 0, w, 130);
-  // ondulações na água
-  for(let i=0;i<3;i++){
-    ctx.strokeStyle = `rgba(165,243,252,${0.15 - i*0.04})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for(let x=0; x<=w; x+=8){
-      const y = 110 + Math.sin((x + tick*1.5 + i*30)*0.025)*3 - i*4;
-      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-  }
-
-  // bandeirinhas no topo da festa
-  const bandeiraColors = ["#ef4444","#facc15","#22c55e","#3b82f6","#a855f7","#fb923c"];
-  for(let i=0; i<Math.ceil(w/40)+1; i++){
-    const bx = i*40;
-    const by = 138 + Math.sin(tick*0.05 + i*0.5)*3;
-    ctx.fillStyle = bandeiraColors[i % bandeiraColors.length];
-    ctx.beginPath();
-    ctx.moveTo(bx, by);
-    ctx.lineTo(bx + 16, by);
-    ctx.lineTo(bx + 8, by + 16);
-    ctx.closePath();
-    ctx.fill();
-    // cordão
-    if(i < Math.ceil(w/40)){
-      ctx.strokeStyle = "rgba(254,215,170,0.5)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(bx + 8, by - 1);
-      ctx.lineTo(bx + 48, 138 + Math.sin(tick*0.05 + (i+1)*0.5)*3 - 1);
-      ctx.stroke();
-    }
-  }
-
-  // FOGUEIRA central
-  const fcx = w/2, fcy = h*0.55;
-  // brasas
-  for(let i=0;i<6;i++){
-    const ang = (i/6)*Math.PI*2 + tick*0.05;
-    const px = fcx + Math.cos(ang)*22;
-    const py = fcy + 18 + Math.sin(ang)*4;
-    ctx.fillStyle = "#451a03";
-    ctx.fillRect(px-6, py, 12, 4);
-  }
-  // chamas pulsantes
-  ctx.shadowBlur = 30;
-  ctx.shadowColor = "#fb923c";
-  for(let i=0;i<3;i++){
-    const wob = Math.sin(tick*0.2 + i)*4;
-    const fg = ctx.createRadialGradient(fcx + wob, fcy - 10 - i*8, 1, fcx + wob, fcy, 24 - i*4);
-    fg.addColorStop(0, "#fef9c3");
-    fg.addColorStop(0.4, "#fbbf24");
-    fg.addColorStop(0.8, "#dc2626");
-    fg.addColorStop(1, "rgba(127,29,29,0)");
-    ctx.fillStyle = fg;
-    ctx.beginPath();
-    ctx.ellipse(fcx + wob, fcy - 4 - i*5, 18 - i*3, 28 - i*5, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-  ctx.shadowBlur = 0;
-
-  // luz da fogueira no chão (anel claro)
-  const lg = ctx.createRadialGradient(fcx, fcy, 30, fcx, fcy, 200);
-  lg.addColorStop(0, "rgba(251,146,60,0.18)");
-  lg.addColorStop(1, "rgba(251,146,60,0)");
-  ctx.fillStyle = lg;
-  ctx.fillRect(0, 100, w, h-100);
-}
-
-// =========================
-// DESENHO DAS PESSOAS
-// =========================
-function drawPessoa(p){
-  const px = p.x;
-  const py = p.y;
-  const bob = Math.sin(tick*0.15 + p.bobOffset)*1.2;
-
-  // sombra
-  ctx.fillStyle = "rgba(0,0,0,0.4)";
-  ctx.beginPath();
-  ctx.ellipse(px, py + 26, 11, 3, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // aura rosada do boto (sutil mas perceptível)
-  if(p.isBoto && !p.transformando){
-    ctx.shadowBlur = 22;
-    ctx.shadowColor = "#ec4899";
-    ctx.fillStyle = `rgba(236,72,153,${0.10 + Math.sin(tick*0.1)*0.04})`;
-    ctx.beginPath();
-    ctx.arc(px, py, 26, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  }
-
-  // anel vermelho de "indignado" se errou nele
-  if(p.indignado != null && p.indignado > 0){
-    const a = p.indignado / 30;
-    ctx.strokeStyle = `rgba(239,68,68,${a})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(px, py, 22 + (1-a)*10, 0, Math.PI*2);
-    ctx.stroke();
-  }
-
-  // pernas
-  ctx.fillStyle = p.corCalca;
-  ctx.fillRect(px - 5, py + 8 + bob, 4, 14);
-  ctx.fillRect(px + 1, py + 8 + bob, 4, 14);
-  // sapato
-  ctx.fillStyle = "#0c0a09";
-  ctx.fillRect(px - 6, py + 21 + bob, 5, 2);
-  ctx.fillRect(px + 1, py + 21 + bob, 5, 2);
-
-  // corpo (camisa/vestido)
-  if(p.eMulher){
-    // vestido em A
-    ctx.fillStyle = p.corCamisa;
-    ctx.beginPath();
-    ctx.moveTo(px - 8, py - 4 + bob);
-    ctx.lineTo(px + 8, py - 4 + bob);
-    ctx.lineTo(px + 12, py + 12 + bob);
-    ctx.lineTo(px - 12, py + 12 + bob);
-    ctx.closePath();
-    ctx.fill();
-    // detalhes do vestido
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    for(let i=-1;i<=1;i++){
-      ctx.beginPath();
-      ctx.arc(px + i*4, py + 6 + bob, 1, 0, Math.PI*2);
-      ctx.fill();
-    }
+  if(mx !== 0 || my !== 0){
+    const len = Math.hypot(mx, my);
+    mx /= len; my /= len;
+    player.x += mx * player.speed;
+    player.y += my * player.speed;
+    player.faceX = mx; player.faceY = my;
+    player.moveX = mx; player.moveY = my;
   } else {
-    // camisa quadrada (homem)
-    ctx.fillStyle = p.corCamisa;
-    ctx.fillRect(px - 8, py - 4 + bob, 16, 14);
-    // detalhe quadriculado (xadrez de festa junina)
-    ctx.fillStyle = "rgba(0,0,0,0.18)";
-    for(let i=0;i<2;i++){
-      for(let j=0;j<3;j++){
-        if((i+j)%2 === 0){
-          ctx.fillRect(px - 8 + i*8, py - 4 + j*5 + bob, 8, 5);
+    player.moveX = 0; player.moveY = 0;
+  }
+
+  // Bordas
+  player.x = Math.max(20, Math.min(w-20, player.x));
+  player.y = Math.max(110, Math.min(h-50, player.y));
+  empurrarFora(player, 14);
+
+  // === SEDUÇÃO EM ANDAMENTO ===
+  if(player.seduzindo){
+    const alvo = player.seduzindo;
+    if(!alvo.vivo){
+      player.seduzindo = null; player.sedTimer = 0;
+    } else {
+      // checar se alguém entrou no raio durante a sedução
+      let visto = false;
+      for(const n of npcs){
+        if(!n.vivo || n === alvo) continue;
+        const d = Math.hypot(player.x - n.x, player.y - n.y);
+        if(d < RAIO_VISAO_NPC){
+          visto = true;
+          // testemunha entra em pânico
+          n.estado = 'panico';
+          n.alvoX = n.x < w/2 ? 30 : w - 30;
+          n.alvoY = n.y < h/2 ? 130 : h - 60;
+          n.timerPanico = 240;
+          suspeita = Math.min(SUSP_MAX, suspeita + 25);
+          atualizarSuspBar();
+          flashFeedback('🚨 Te viram!', '#fca5a5');
+          break;
+        }
+      }
+      if(visto){
+        player.seduzindo = null;
+        player.sedTimer = 0;
+        alvo.estado = 'andando';
+        alvo.timerEstado = 60;
+      } else {
+        player.sedTimer++;
+        if(player.sedTimer >= SEDUCAO_TICKS){
+          // SEDUZIDO!
+          alvo.vivo = false;
+          spawnHearts(alvo.x, alvo.y);
+          seduzidos++;
+          document.getElementById('seduzidos').innerText = seduzidos;
+          player.seduzindo = null;
+          player.sedTimer  = 0;
+          if(seduzidos >= META_FESTEIROS){ vencer(); return; }
         }
       }
     }
   }
 
-  // pescoço
-  ctx.fillStyle = p.corPele;
-  ctx.fillRect(px - 2, py - 7 + bob, 4, 4);
+  // === NPCs ===
+  for(const n of npcs){
+    if(!n.vivo) continue;
+    n.timerEstado--;
+    if(n.timerEstado <= 0 && n.estado !== 'panico'){
+      const r = Math.random();
+      if(r < 0.55){
+        n.estado = 'andando';
+        const a = Math.random()*Math.PI*2;
+        n.vx = Math.cos(a)*0.6; n.vy = Math.sin(a)*0.6;
+      } else if(r < 0.85){
+        n.estado = 'dancando';
+        n.vx = 0; n.vy = 0;
+      } else {
+        n.estado = 'parado';
+        n.vx = 0; n.vy = 0;
+      }
+      n.timerEstado = 80 + Math.random()*200;
+    }
 
-  // cabeça
-  ctx.fillStyle = p.corPele;
-  ctx.beginPath();
-  ctx.arc(px, py - 12 + bob, 7, 0, Math.PI*2);
-  ctx.fill();
-
-  // olhos
-  ctx.fillStyle = "#1c1917";
-  ctx.fillRect(px - 3, py - 13 + bob, 1.5, 1.5);
-  ctx.fillRect(px + 1.5, py - 13 + bob, 1.5, 1.5);
-  // sorriso
-  ctx.strokeStyle = "#1c1917";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(px, py - 10 + bob, 2, 0.2, Math.PI - 0.2);
-  ctx.stroke();
-
-  // CHAPÉU
-  if(p.eMulher){
-    // chapéu/laço de moça (laço grande colorido)
-    ctx.fillStyle = "#dc2626";
-    ctx.beginPath();
-    ctx.moveTo(px - 6, py - 17 + bob);
-    ctx.lineTo(px + 6, py - 17 + bob);
-    ctx.lineTo(px, py - 23 + bob);
-    ctx.closePath();
-    ctx.fill();
-  } else if(p.chapeuVisivel || p.isBoto){
-    if(p.isBoto){
-      // chapéu branco característico do boto, com brilho rosado
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = "#fbcfe8";
-      ctx.fillStyle = "#fafafa";
-      ctx.fillRect(px - 9, py - 18 + bob, 18, 3);
-      ctx.fillRect(px - 6, py - 24 + bob, 12, 6);
-      ctx.shadowBlur = 0;
-      // fita do chapéu (rosa claro)
-      ctx.fillStyle = "#fbcfe8";
-      ctx.fillRect(px - 6, py - 19 + bob, 12, 1.5);
-    } else {
-      // chapéu de palha tradicional
-      ctx.fillStyle = p.corChapeu;
-      ctx.fillRect(px - 9, py - 18 + bob, 18, 3);
-      ctx.fillRect(px - 6, py - 23 + bob, 12, 5);
+    if(n.estado === 'andando'){
+      n.x += n.vx;
+      n.y += n.vy;
+      if(n.x < 30 || n.x > w-30) n.vx *= -1;
+      if(n.y < 120 || n.y > h-50) n.vy *= -1;
+      n.faceX = n.vx; n.faceY = n.vy;
+      empurrarFora(n, 13);
+    } else if(n.estado === 'panico'){
+      const dx = n.alvoX - n.x, dy = n.alvoY - n.y;
+      const d = Math.hypot(dx, dy);
+      if(d > 6){
+        n.x += dx/d * 2.4; n.y += dy/d * 2.4;
+        n.faceX = dx/d; n.faceY = dy/d;
+        // Pânico continua subindo suspeita lentamente
+        if(tick % 30 === 0){ suspeita = Math.min(SUSP_MAX, suspeita + 1); }
+      }
+      n.timerPanico--;
+      if(n.timerPanico <= 0){
+        n.estado = 'andando';
+        const a = Math.random()*Math.PI*2;
+        n.vx = Math.cos(a)*0.6; n.vy = Math.sin(a)*0.6;
+        n.timerEstado = 120;
+      }
+      empurrarFora(n, 13);
     }
   }
 
-  // pingo d'água caindo (só do boto)
-  if(p.isBoto && p.gotaY != null){
-    ctx.fillStyle = "rgba(165,243,252,0.85)";
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = "#22d3ee";
-    ctx.beginPath();
-    ctx.moveTo(px + 8, py - 3 + bob + p.gotaY);
-    ctx.bezierCurveTo(px + 10, py + 1 + bob + p.gotaY, px + 10, py + 4 + bob + p.gotaY, px + 8, py + 5 + bob + p.gotaY);
-    ctx.bezierCurveTo(px + 6, py + 4 + bob + p.gotaY, px + 6, py + 1 + bob + p.gotaY, px + 8, py - 3 + bob + p.gotaY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.shadowBlur = 0;
+  // === CAÇADORES ===
+  if(suspeita >= SUSP_MAX && cacadores.length === 0){
+    cacadores.push({x: -20,  y: 130, speed: 2.0});
+    cacadores.push({x: w+20, y: h-80, speed: 2.0});
+    flashFeedback('🚨 CAÇADORES!', '#dc2626');
+  }
+  for(const cz of cacadores){
+    const dx = player.x - cz.x, dy = player.y - cz.y;
+    const d = Math.hypot(dx, dy);
+    if(d > 1){ cz.x += dx/d * cz.speed; cz.y += dy/d * cz.speed; }
+    if(d < 26 && player.invuln <= 0){ perder('Os caçadores te pegaram!'); return; }
+    empurrarFora(cz, 14);
   }
 
-  // efeito de transformação após acerto
-  if(p.transformando){
-    const t = p.transformTime / 60;     // 0 → 1
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = "#ec4899";
-    ctx.fillStyle = `rgba(236,72,153,${1 - t})`;
-    ctx.beginPath();
-    ctx.arc(px, py, 30 + t*30, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    // emoji boto
-    ctx.font = `${30 + t*20}px Arial`;
-    ctx.textAlign = "center";
-    ctx.fillText("🐬", px, py + 10 - t*60);
-    ctx.textAlign = "start";
+  // Suspeita decai lentamente se sem caçadores ativos e ninguém em pânico
+  const algumPanico = npcs.some(n => n.vivo && n.estado === 'panico');
+  if(suspeita > 0 && cacadores.length === 0 && !algumPanico && tick % 20 === 0){
+    suspeita = Math.max(0, suspeita - 0.5);
+    atualizarSuspBar();
+  }
+
+  // Partículas
+  for(let i=particulas.length-1;i>=0;i--){
+    const p = particulas[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.04;
+    p.life--;
+    if(p.life <= 0) particulas.splice(i,1);
+  }
+
+  if(player.invuln > 0) player.invuln--;
+}
+
+function spawnHearts(x, y){
+  for(let i=0;i<8;i++){
+    particulas.push({
+      x, y,
+      vx:(Math.random()-0.5)*2.5,
+      vy:-1 - Math.random()*2,
+      life:50 + Math.random()*30,
+      maxLife:80,
+      cor:'#ec4899',
+      tipo:'heart'
+    });
   }
 }
 
-// =========================
-// DESENHO PRINCIPAL
-// =========================
-function draw(){
-  ctx.clearRect(0,0,w,h);
-  drawCenario();
-  // ordena pessoas pelo Y pra dar profundidade
-  const ordenadas = [...pessoas].sort((a,b)=>a.y - b.y);
-  for(const p of ordenadas) drawPessoa(p);
+function atualizarSuspBar(){
+  const f = document.getElementById('suspFill');
+  const p = (suspeita / SUSP_MAX) * 100;
+  f.style.width = p + '%';
+  if(p > 75) f.classList.add('alta');
+  else f.classList.remove('alta');
 }
 
-// =========================
-// LOOP
-// =========================
+function flashFeedback(texto, cor){
+  if(feedbackEl){ feedbackEl.remove(); }
+  const el = document.createElement('div');
+  el.className = 'feedback';
+  el.style.color = cor || '#fbcfe8';
+  el.innerText = texto;
+  document.getElementById('game').appendChild(el);
+  feedbackEl = el;
+  setTimeout(() => { if(el.parentNode) el.remove(); }, 800);
+}
+
+function vencer(){
+  vitoria = true;
+  document.getElementById('goTitle').innerText = '🐬 Festa esvaziada!';
+  document.getElementById('goMsg').innerText = 'Você levou todos pro rio sem ser pego!';
+  document.getElementById('finalScore').innerText = seduzidos;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function perder(msg){
+  if(gameOver) return;
+  gameOver = true;
+  document.getElementById('goTitle').innerText = '🐬 Você foi descoberto!';
+  document.getElementById('goMsg').innerText = msg;
+  document.getElementById('finalScore').innerText = seduzidos;
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ===== RENDER =====
+function render(){
+  // Chão da festa (gradiente terra/areia + tapete dança)
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, '#3b1d0c');
+  grad.addColorStop(0.5, '#4a2511');
+  grad.addColorStop(1, '#1e1b4b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Pisca-pisca da festa (linha de luzes no topo)
+  for(let i=0;i<Math.ceil(w/40);i++){
+    const x = i*40 + 20;
+    const blink = (Math.sin(tick*0.1 + i*0.7) + 1)/2;
+    ctx.fillStyle = `rgba(${250+i*0%256},${204-i*10%150},${21+i*30%200},${0.4 + blink*0.5})`;
+    ctx.beginPath();
+    ctx.arc(x, 105, 2.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Tapete de dança ao centro
+  ctx.fillStyle = 'rgba(236,72,153,0.06)';
+  ctx.beginPath();
+  ctx.ellipse(w/2, h*0.55, 130, 80, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Obstáculos
+  for(const o of obstaculos){
+    if(o.tipo === 'palco'){
+      // palco
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(o.x, o.y+o.h-6, o.w, 6);
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 11px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('🎵 PALCO 🎵', o.x+o.w/2, o.y+27);
+    } else if(o.tipo === 'fogueira'){
+      const cx = o.x + o.w/2, cy = o.y + o.h/2;
+      // luz no chão
+      const lr = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+      lr.addColorStop(0, 'rgba(251,146,60,0.35)');
+      lr.addColorStop(1, 'rgba(251,146,60,0)');
+      ctx.beginPath(); ctx.arc(cx, cy, 80, 0, Math.PI*2); ctx.fill();
+      // troncos
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx-14, cy+12); ctx.lineTo(cx+14, cy-6);
+      ctx.moveTo(cx+14, cy+12); ctx.lineTo(cx-14, cy-6);
+      ctx.stroke();
+      // chama (sem shadowBlur em mobile gracas ao override)
+      ctx.shadowBlur = 22; ctx.shadowColor = '#fb923c';
+      ctx.fillStyle = '#fb923c';
+      ctx.beginPath();
+      const flick = 18 + Math.sin(tick*0.25)*3;
+      ctx.arc(cx, cy-2, flick, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath(); ctx.arc(cx, cy-4, 8, 0, Math.PI*2); ctx.fill();
+    } else if(o.tipo === 'mesa'){
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2;
+      ctx.strokeRect(o.x, o.y, o.w, o.h);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(o.x+8, o.y+8, 6, 8);
+      ctx.fillRect(o.x+24, o.y+8, 6, 8);
+      ctx.fillRect(o.x+44, o.y+8, 6, 8);
+      ctx.fillStyle = 'rgba(220,38,38,0.4)';
+      ctx.fillRect(o.x, o.y+22, o.w, 6);
+    } else if(o.tipo === 'rio'){
+      const rg = ctx.createLinearGradient(0, o.y, 0, o.y+o.h);
+      rg.addColorStop(0, '#1e3a8a');
+      rg.addColorStop(1, '#0c1e4a');
+      ctx.fillStyle = rg;
+      ctx.fillRect(0, o.y, w, o.h);
+      ctx.strokeStyle = 'rgba(186,230,253,0.3)';
+      ctx.lineWidth = 1;
+      for(let i=0;i<3;i++){
+        ctx.beginPath();
+        for(let x=0;x<w;x+=10){
+          const yy = o.y + 8 + i*8 + Math.sin((x+tick*2+i*30)*0.05)*2;
+          if(x===0) ctx.moveTo(x, yy);
+          else ctx.lineTo(x, yy);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+
+  // === NPCs ===
+  for(const n of npcs){
+    if(!n.vivo) continue;
+    desenharFesteiro(n);
+  }
+
+  // === RAIO DE ACAO + RAIO DE VISAO durante seducao ===
+  if(player.seduzindo){
+    ctx.strokeStyle = 'rgba(220,38,38,0.45)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, RAIO_VISAO_NPC, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const prog = player.sedTimer / SEDUCAO_TICKS;
+    ctx.strokeStyle = '#ec4899';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 30, -Math.PI/2, -Math.PI/2 + prog*Math.PI*2);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+    if(player.seduzindo.vivo){
+      ctx.strokeStyle = 'rgba(236,72,153,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(player.x, player.y);
+      ctx.lineTo(player.seduzindo.x, player.seduzindo.y);
+      ctx.stroke();
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ec4899';
+      const offset = Math.sin(tick*0.2) * 2;
+      ctx.fillText('\u{1f497}', player.seduzindo.x, player.seduzindo.y - 26 + offset);
+    }
+  } else {
+    ctx.strokeStyle = 'rgba(251,207,232,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, RAIO_ACAO, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // === PLAYER ===
+  desenharBoto(player);
+
+  // === CACADORES ===
+  for(const cz of cacadores){
+    desenharCacador(cz);
+  }
+
+  // === PARTICULAS ===
+  for(const p of particulas){
+    const a = p.life / p.maxLife;
+    ctx.globalAlpha = a;
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('\u{1f497}', p.x, p.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function desenharFesteiro(n){
+  const x = n.x, y = n.y;
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(x, y+18, 13, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  let bobY = 0;
+  if(n.estado === 'dancando'){
+    bobY = Math.sin(tick*0.25 + n.bobOffset) * 3;
+  }
+
+  ctx.fillStyle = n.cor;
+  ctx.fillRect(x-7, y-2 + bobY, 14, 16);
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(x-7, y+12 + bobY, 6, 8);
+  ctx.fillRect(x+1, y+12 + bobY, 6, 8);
+  ctx.fillStyle = n.pele;
+  if(n.estado === 'dancando'){
+    const armSwing = Math.sin(tick*0.25 + n.bobOffset);
+    ctx.fillRect(x-10, y - armSwing*4 + bobY, 3, 9);
+    ctx.fillRect(x+7,  y + armSwing*4 + bobY, 3, 9);
+  } else {
+    ctx.fillRect(x-10, y+1 + bobY, 3, 9);
+    ctx.fillRect(x+7,  y+1 + bobY, 3, 9);
+  }
+  ctx.fillStyle = n.pele;
+  ctx.beginPath();
+  ctx.arc(x, y-8 + bobY, 6.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = n.cabelo;
+  ctx.beginPath();
+  ctx.arc(x, y-10 + bobY, 6.5, Math.PI, 0);
+  ctx.fill();
+
+  if(n.estado === 'panico'){
+    ctx.fillStyle = '#fca5a5';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('!', x, y - 18 + bobY);
+    ctx.strokeStyle = 'rgba(220,38,38,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  if(n.estado === 'dancando' && Math.random() < 0.04){
+    ctx.fillStyle = '#facc15';
+    ctx.font = '8px sans-serif';
+    ctx.fillText('✦', x + (Math.random()-0.5)*20, y - 8 + bobY);
+  }
+}
+
+function desenharBoto(p){
+  const x = p.x, y = p.y;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(x, y+18, 14, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.shadowBlur = 16; ctx.shadowColor = '#ec4899';
+  ctx.fillStyle = '#fef9c3';
+  ctx.fillRect(x-8, y-2, 16, 17);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ec4899';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x-2, y+5);
+  ctx.lineTo(x+2, y+5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillRect(x-2, y+5, 4, 8);
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(x-7, y+13, 6, 8);
+  ctx.fillRect(x+1, y+13, 6, 8);
+  ctx.fillStyle = '#fef9c3';
+  ctx.fillRect(x-11, y+1, 3, 10);
+  ctx.fillRect(x+8,  y+1, 3, 10);
+  ctx.fillStyle = '#fde68a';
+  ctx.beginPath();
+  ctx.arc(x, y-8, 6.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#7c2d12';
+  ctx.fillRect(x-10, y-13, 20, 2);
+  ctx.fillStyle = '#9d174d';
+  ctx.fillRect(x-7, y-19, 14, 7);
+  ctx.fillStyle = '#ec4899';
+  ctx.fillRect(x-7, y-14, 14, 1.5);
+}
+
+function desenharCacador(cz){
+  const x = cz.x, y = cz.y;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(x, y+20, 14, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(x-8, y-2, 16, 18);
+  ctx.fillStyle = '#facc15';
+  ctx.fillRect(x-8, y+10, 16, 2);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(x-8, y+14, 7, 8);
+  ctx.fillRect(x+1, y+14, 7, 8);
+  ctx.fillStyle = '#d8a878';
+  ctx.beginPath();
+  ctx.arc(x, y-8, 6.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#451a03';
+  ctx.fillRect(x-9, y-14, 18, 3);
+  ctx.fillRect(x-6, y-20, 12, 6);
+  ctx.fillStyle = '#dc2626';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('!', x, y-26);
+}
+
+// ===== LOOP =====
 function loop(){
-  update();
-  draw();
+  if(!gameOver && !vitoria) update();
+  render();
   requestAnimationFrame(loop);
 }
 
-// =========================
-// VAGALUMES (DOM)
-// =========================
-const ff = document.getElementById("particles");
-for(let i=0;i<25;i++){
-  const f = document.createElement("div");
-  f.className = "firefly";
-  f.style.left = Math.random()*100 + "%";
-  f.style.top = (40 + Math.random()*60) + "%";
-  f.style.animationDuration = (5 + Math.random()*7) + "s";
-  f.style.animationDelay = Math.random()*8 + "s";
-  ff.appendChild(f);
-}
+// ===== INPUT =====
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(k === 'arrowup' || k === 'w') teclas.up = true;
+  if(k === 'arrowdown' || k === 's') teclas.down = true;
+  if(k === 'arrowleft' || k === 'a') teclas.left = true;
+  if(k === 'arrowright' || k === 'd') teclas.right = true;
+  if(k === ' ' || k === 'enter' || k === 'e'){ e.preventDefault(); tentarSeduzir(); }
+});
+window.addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  if(k === 'arrowup' || k === 'w') teclas.up = false;
+  if(k === 'arrowdown' || k === 's') teclas.down = false;
+  if(k === 'arrowleft' || k === 'a') teclas.left = false;
+  if(k === 'arrowright' || k === 'd') teclas.right = false;
+});
 
-resize();
+document.querySelectorAll('.dpad button').forEach(btn => {
+  const dir = btn.dataset.dir;
+  const setOn  = e => { e.preventDefault(); teclas[dir] = true; };
+  const setOff = e => { e.preventDefault(); teclas[dir] = false; };
+  btn.addEventListener('touchstart', setOn,  { passive:false });
+  btn.addEventListener('touchend',   setOff, { passive:false });
+  btn.addEventListener('touchcancel',setOff, { passive:false });
+  btn.addEventListener('mousedown',  setOn);
+  btn.addEventListener('mouseup',    setOff);
+  btn.addEventListener('mouseleave', setOff);
+});
+
+const acaoBtn = document.getElementById('acaoBtn');
+acaoBtn.addEventListener('touchstart', e => { e.preventDefault(); tentarSeduzir(); }, { passive:false });
+acaoBtn.addEventListener('mousedown',  e => { e.preventDefault(); tentarSeduzir(); });
+
+c.addEventListener('click', e => {
+  if(IS_MOBILE) return;
+  tentarSeduzir();
+});
+</script>
+
+</body>
+</html>
+});
 </script>
 
 </body>

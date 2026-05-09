@@ -472,6 +472,13 @@ canvas{
   .dpad button{ width:42px; height:42px; font-size:16px; }
   .fire-btn{ width:68px; height:68px; bottom:24px; right:14px; font-size:28px; }
 }
+
+/* === OTIMIZACAO MOBILE === */
+@media (max-width: 900px), (pointer: coarse){
+  *{ backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .titulo, .voltar, .hud, .hp-hud, .dpad button, .fire-btn{ filter: none !important; }
+  .btn-comecar{ box-shadow: 0 4px 12px rgba(0,0,0,.4) !important; }
+}
 </style>
 </head>
 
@@ -539,6 +546,14 @@ canvas{
 <script>
 const c=document.getElementById("c");
 const ctx=c.getContext("2d");
+
+// === OTIMIZACAO MOBILE: desabilita shadowBlur (custa MUITO em GPU mobile) ===
+const IS_MOBILE = window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
+if(IS_MOBILE){
+  let _sb=0,_sc='transparent';
+  Object.defineProperty(ctx,'shadowBlur',{get:()=>_sb,set:v=>{_sb=0;}});
+  Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
+}
 
 let w,h;
 function resize(){
