@@ -475,6 +475,46 @@ if(IS_MOBILE){
   Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
 }
 
+// ===== SFX + DIFICULDADE =====
+const SFX = (() => {
+  let actx = null;
+  const ensure = () => {
+    if(!actx){ try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+    if(actx && actx.state === 'suspended') actx.resume();
+  };
+  const isMuted = () => localStorage.getItem('amazonia.mute') === '1';
+  const play = (cfg) => {
+    if(isMuted()) return;
+    ensure(); if(!actx) return;
+    const t0 = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = cfg.type || 'sine';
+    o.frequency.setValueAtTime(cfg.f1, t0);
+    if(cfg.f2 != null) o.frequency.exponentialRampToValueAtTime(Math.max(1,cfg.f2), t0 + cfg.dur);
+    g.gain.setValueAtTime(cfg.vol || 0.12, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + cfg.dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t0); o.stop(t0 + cfg.dur + 0.02);
+  };
+  return {
+    play, isMuted,
+    setMuted: (m) => localStorage.setItem('amazonia.mute', m ? '1' : '0'),
+    plantar:  () => play({f1:660, f2:880, dur:0.10, type:'square',   vol:0.10}),
+    inimigo:  () => play({f1:440, f2:110, dur:0.18, type:'sawtooth', vol:0.12}),
+    onda:     () => play({f1:220, f2:440, dur:0.30, type:'triangle', vol:0.14}),
+    morte:    () => play({f1:200, f2:55,  dur:0.6,  type:'sawtooth', vol:0.18})
+  };
+})();
+const DIF = (() => {
+  const get = () => localStorage.getItem('amazonia.dif') || 'medio';
+  const MULT = {
+    facil:   { vel:0.75, hp:1.5, spawn:0.7, premio:1.2 },
+    medio:   { vel:1.0,  hp:1.0, spawn:1.0, premio:1.0 },
+    dificil: { vel:1.3,  hp:0.7, spawn:1.4, premio:0.85 }
+  };
+  return { get, mult: () => MULT[get()] || MULT.medio };
+})();
+
 let w, h;
 function resize(){
   const vv = window.visualViewport;
@@ -668,6 +708,7 @@ function tentarPosicionar(x, y){
     x, y, tipo:armSelecionada,
     cooldown:0, lastTarget:null
   });
+  SFX.plantar();
   document.getElementById("sementes").innerText = sementes;
   if(sementes < tipo.custo) armSelecionada = null;
   atualizarPainelArm();
@@ -696,6 +737,7 @@ function iniciarOnda(){
   if(ondaAtiva || gameOver) return;
   if(onda > MAX_ONDAS) return;
   ondaAtiva = true;
+  SFX.onda();
   document.getElementById("btnOnda").style.display = "none";
   // expande lista de spawns
   inimigosPorSpawn = [];
@@ -714,11 +756,13 @@ function spawnarInimigos(){
     spawnTimer = 0;
     const tipo = inimigosPorSpawn.shift();
     const t = INIM_TIPOS[tipo];
+    const _m = DIF.mult();
     inimigos.push({
       tipo,
-      hp: t.hp, hpMax: t.hp,
-      speed: t.speed,
-      baseSpeed: t.speed,
+      hp: Math.max(1, Math.round(t.hp * _m.hp)),
+      hpMax: Math.max(1, Math.round(t.hp * _m.hp)),
+      speed: t.speed * _m.vel,
+      baseSpeed: t.speed * _m.vel,
       progresso: 0,
       slowAte: 0,
       x: trilha[0].x, y: trilha[0].y
@@ -771,6 +815,7 @@ function update(){
       document.getElementById("sementes").innerText = sementes;
       inimigos.splice(i, 1);
       atualizarPainelArm();
+      SFX.inimigo();
     }
   }
 
@@ -833,6 +878,7 @@ function update(){
 function perderJogo(){
   gameOver = true;
   ondaAtiva = false;
+  SFX.morte();
   document.getElementById("finalOnda").innerText = onda;
   document.getElementById("finalAnim").innerText = vidas;
   document.getElementById("goTitle").innerText = "🌳 A floresta caiu";
@@ -1098,12 +1144,25 @@ function drawInimigos(){
 }
 
 function drawPreview(){
-  // ao posicionar uma armadilha, mostra preview no cursor
   if(!armSelecionada) return;
   if(mouseX === 0 && mouseY === 0) return;
   const tipo = ARM_TIPOS[armSelecionada];
-  const valido = distAteATrilha({x:mouseX,y:mouseY}) >= 40
-    && mouseY < h - 110 && mouseY > 100
+  const valido = distAteATrilha({x:mouseX,y:mouseY}) >= 40 && mouseY < h - 110 && mouseY > 100;
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = valido ? "rgba(34,197,94,0.4)" : "rgba(220,38,38,0.4)";
+  ctx.beginPath();
+  ctx.arc(mouseX, mouseY, tipo.alcance || 90, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.font = "32px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(tipo.emoji, mouseX, mouseY + 10);
+}
+</script>
+</body>
+</html>
+<!-- pad zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz -->
+ 110 && mouseY > 100
     && armadilhas.every(a => Math.hypot(a.x-mouseX, a.y-mouseY) >= 36);
 
   ctx.strokeStyle = valido ? "rgba(34,197,94,0.6)" : "rgba(239,68,68,0.6)";
@@ -1161,3 +1220,20 @@ for(let i=0;i<15;i++){
 
 </body>
 </html>
+ni.hp/ini.hpMax > 0.25 ? "#fbbf24" : "#dc2626";
+    ctx.fillRect(ini.x - barW/2, barY, barW * (ini.hp/ini.hpMax), barH);
+  }
+}
+</script>
+</body>
+</html>
+<!-- BUFFER ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -->
+ = valido ? "rgba(34,197,94,0.4)" : "rgba(220,38,38,0.4)";
+  ctx.beginPath();
+  ctx.arc(mouseX, mouseY, 90, 0, Math.PI*2);
+  ctx.fill();
+}
+</script>
+</body>
+</html>
+<!-- pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad  -->
