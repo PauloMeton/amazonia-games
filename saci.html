@@ -595,46 +595,6 @@ if(IS_MOBILE){
   Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
 }
 
-// ===== SFX + DIFICULDADE =====
-const SFX = (() => {
-  let actx = null;
-  const ensure = () => {
-    if(!actx){ try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-    if(actx && actx.state === 'suspended') actx.resume();
-  };
-  const isMuted = () => localStorage.getItem('amazonia.mute') === '1';
-  const play = (cfg) => {
-    if(isMuted()) return;
-    ensure(); if(!actx) return;
-    const t0 = actx.currentTime;
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = cfg.type || 'sine';
-    o.frequency.setValueAtTime(cfg.f1, t0);
-    if(cfg.f2 != null) o.frequency.exponentialRampToValueAtTime(Math.max(1,cfg.f2), t0 + cfg.dur);
-    g.gain.setValueAtTime(cfg.vol || 0.12, t0);
-    g.gain.exponentialRampToValueAtTime(0.001, t0 + cfg.dur);
-    o.connect(g); g.connect(actx.destination);
-    o.start(t0); o.stop(t0 + cfg.dur + 0.02);
-  };
-  return {
-    play, isMuted,
-    setMuted: (m) => localStorage.setItem('amazonia.mute', m ? '1' : '0'),
-    vento:     () => play({f1:200, f2:1200, dur:0.35, type:'triangle', vol:0.12}),
-    teleporte: () => play({f1:1200, f2:200, dur:0.30, type:'sine',     vol:0.14}),
-    redemoinho:() => play({f1:300, f2:900,  dur:0.50, type:'sawtooth', vol:0.10}),
-    morte:     () => play({f1:200, f2:55,   dur:0.6,  type:'sawtooth', vol:0.18})
-  };
-})();
-const DIF = (() => {
-  const get = () => localStorage.getItem('amazonia.dif') || 'medio';
-  const MULT = {
-    facil:   { vel:0.75, hp:1.5, spawn:0.7, premio:1.2 },
-    medio:   { vel:1.0,  hp:1.0, spawn:1.0, premio:1.0 },
-    dificil: { vel:1.3,  hp:0.7, spawn:1.4, premio:0.85 }
-  };
-  return { get, mult: () => MULT[get()] || MULT.medio };
-})();
-
 let w,h;
 function resize(){
   const vv = window.visualViewport;
@@ -761,7 +721,6 @@ function moverSaci(){
 function vento(){
   if(gameOver || cooldowns.vento > 0) return;
   cooldowns.vento = COOLDOWN_VENTO;
-  SFX.vento();
 
   const cx = saci.x + saci.s/2, cy = saci.y + saci.s/2;
   // efeito visual: onda expansiva
@@ -788,7 +747,6 @@ function vento(){
 function teleporte(){
   if(gameOver || cooldowns.teleporte > 0) return;
   cooldowns.teleporte = COOLDOWN_TELEPORTE;
-  SFX.teleporte();
 
   // efeito de partida no local atual
   efeitos.push({tipo:'tp_saida', x:saci.x+saci.s/2, y:saci.y+saci.s/2, vida:30, vidaMax:30});
@@ -804,7 +762,6 @@ function redemoinho(){
   if(gameOver || cooldowns.redemoinho > 0) return;
   cooldowns.redemoinho = COOLDOWN_REDEMOINHO;
   redemoinhoAtivo = true;
-  SFX.redemoinho();
   setTimeout(()=>{ redemoinhoAtivo = false; }, 3000);
 }
 
@@ -819,7 +776,7 @@ function updateEnemies(){
   inimigos.forEach(i=>{
     i.spawnAge++;
     // velocidade é menor enquanto entra (efeito "surgindo")
-    const vel = (i.spawnAge < 30 ? 0.005 : 0.012) * DIF.mult().vel;
+    const vel = i.spawnAge < 30 ? 0.005 : 0.012;
     i.x += (saci.x - i.x) * vel;
     i.y += (saci.y - i.y) * vel;
     i.tiroTimer++;
@@ -926,7 +883,6 @@ function colisao(){
 
 function perderJogo(){
   gameOver = true;
-  SFX.morte();
   document.getElementById("finalScore").innerText = pontos;
   document.getElementById("overlay").classList.add("show");
 }
@@ -1277,22 +1233,10 @@ function draw(){
   if(redemoinhoAtivo){
     ctx.shadowBlur = 28;
     ctx.shadowColor = "#22d3ee";
+    // 4 espirais girando
     for(let i=0;i<4;i++){
       const ang = tick*0.22 + i*Math.PI/2;
       ctx.strokeStyle = `rgba(165,243,252,${0.75 - i*0.12})`;
-      ctx.lineWidth = 5 - i;
-      ctx.beginPath();
-      ctx.arc(saci.x, saci.y, 60 + i*8, ang, ang + Math.PI*1.3);
-      ctx.stroke();
-    }
-    ctx.shadowBlur = 0;
-  }
-}
-</script>
-</body>
-</html>
-<!-- ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -->
- - i*0.12})`;
       ctx.lineWidth = 5 - i;
       ctx.beginPath();
       ctx.arc(sx, sy + bob, 64 + i*5, ang, ang + Math.PI*1.5);
@@ -1348,26 +1292,3 @@ for(let i=0; i<25; i++){
 
 </body>
 </html>
-rc(0, 0, 4, 0, Math.PI*2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-  }
-}
-</script>
-</body>
-</html>
-<!-- BUFFER bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -->
-neWidth = 5 - i;
-      ctx.beginPath();
-      ctx.arc(saci.x, saci.y, 60, 0, Math.PI*2);
-      ctx.stroke();
-    }
-    ctx.shadowBlur = 0;
-  }
-}
-</script>
-</body>
-</html>
-<!-- pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad-pad  -->

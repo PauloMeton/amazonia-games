@@ -499,46 +499,6 @@ if(IS_MOBILE){
   Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
 }
 
-// ===== SFX + DIFICULDADE =====
-const SFX = (() => {
-  let actx = null;
-  const ensure = () => {
-    if(!actx){ try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-    if(actx && actx.state === 'suspended') actx.resume();
-  };
-  const isMuted = () => localStorage.getItem('amazonia.mute') === '1';
-  const play = (cfg) => {
-    if(isMuted()) return;
-    ensure(); if(!actx) return;
-    const t0 = actx.currentTime;
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = cfg.type || 'sine';
-    o.frequency.setValueAtTime(cfg.f1, t0);
-    if(cfg.f2 != null) o.frequency.exponentialRampToValueAtTime(Math.max(1,cfg.f2), t0 + cfg.dur);
-    g.gain.setValueAtTime(cfg.vol || 0.12, t0);
-    g.gain.exponentialRampToValueAtTime(0.001, t0 + cfg.dur);
-    o.connect(g); g.connect(actx.destination);
-    o.start(t0); o.stop(t0 + cfg.dur + 0.02);
-  };
-  return {
-    play, isMuted,
-    setMuted: (m) => localStorage.setItem('amazonia.mute', m ? '1' : '0'),
-    seduzInicia: () => play({f1:523, f2:880, dur:0.20, type:'sine',     vol:0.10}),
-    seduzido:    () => play({f1:660, f2:1320, dur:0.30, type:'triangle', vol:0.12}),
-    visto:       () => play({f1:220, f2:110, dur:0.18, type:'square',   vol:0.16}),
-    morte:       () => play({f1:200, f2:55,  dur:0.6,  type:'sawtooth', vol:0.18})
-  };
-})();
-const DIF = (() => {
-  const get = () => localStorage.getItem('amazonia.dif') || 'medio';
-  const MULT = {
-    facil:   { vel:0.75, hp:1.5, spawn:0.7, premio:1.2 },
-    medio:   { vel:1.0,  hp:1.0, spawn:1.0, premio:1.0 },
-    dificil: { vel:1.3,  hp:0.7, spawn:1.4, premio:0.85 }
-  };
-  return { get, mult: () => MULT[get()] || MULT.medio };
-})();
-
 let w, h;
 function resize(){
   const vv = window.visualViewport;
@@ -696,7 +656,6 @@ function tentarSeduzir(){
     if(d < RAIO_TESTEMUNHA){
       // alguém está perto → não pode começar
       flashFeedback('👀 Alguém viu!', '#fca5a5');
-      SFX.visto();
       suspeita = Math.min(SUSP_MAX, suspeita + 12);
       atualizarSuspBar();
       // o que viu fica suspeito brevemente
@@ -711,7 +670,6 @@ function tentarSeduzir(){
   alvo.vx = 0; alvo.vy = 0;
   alvo.estado = 'parado';
   alvo.timerEstado = SEDUCAO_TICKS + 30;
-  SFX.seduzInicia();
 }
 
 // ===== UPDATE =====
@@ -765,7 +723,6 @@ function update(){
           suspeita = Math.min(SUSP_MAX, suspeita + 25);
           atualizarSuspBar();
           flashFeedback('🚨 Te viram!', '#fca5a5');
-          SFX.visto();
           break;
         }
       }
@@ -780,7 +737,6 @@ function update(){
           // SEDUZIDO!
           alvo.vivo = false;
           spawnHearts(alvo.x, alvo.y);
-          SFX.seduzido();
           seduzidos++;
           document.getElementById('seduzidos').innerText = seduzidos;
           player.seduzindo = null;
@@ -840,9 +796,8 @@ function update(){
 
   // === CAÇADORES ===
   if(suspeita >= SUSP_MAX && cacadores.length === 0){
-    const _cv = 2.0 * DIF.mult().vel;
-    cacadores.push({x: -20,  y: 130,   speed: _cv});
-    cacadores.push({x: w+20, y: h-80,  speed: _cv});
+    cacadores.push({x: -20,  y: 130, speed: 2.0});
+    cacadores.push({x: w+20, y: h-80, speed: 2.0});
     flashFeedback('🚨 CAÇADORES!', '#dc2626');
   }
   for(const cz of cacadores){
@@ -916,7 +871,6 @@ function vencer(){
 function perder(msg){
   if(gameOver) return;
   gameOver = true;
-  SFX.morte();
   document.getElementById('goTitle').innerText = '🐬 Você foi descoberto!';
   document.getElementById('goMsg').innerText = msg;
   document.getElementById('finalScore').innerText = seduzidos;
@@ -1249,52 +1203,3 @@ c.addEventListener('click', e => {
 
 </body>
 </html>
-extAlign = 'center';
-  ctx.fillText('!', x, y-26);
-}
-
-function loop(){
-  if(!gameOver && !vitoria) update();
-  render();
-  requestAnimationFrame(loop);
-}
-
-window.addEventListener('keydown', e => {
-  const k = e.key.toLowerCase();
-  if(k === 'arrowup'    || k === 'w') teclas.up    = true;
-  if(k === 'arrowdown'  || k === 's') teclas.down  = true;
-  if(k === 'arrowleft'  || k === 'a') teclas.left  = true;
-  if(k === 'arrowright' || k === 'd') teclas.right = true;
-  if(k === ' ' || k === 'enter' || k === 'e'){ e.preventDefault(); tentarSeduzir(); }
-});
-window.addEventListener('keyup', e => {
-  const k = e.key.toLowerCase();
-  if(k === 'arrowup'    || k === 'w') teclas.up    = false;
-  if(k === 'arrowdown'  || k === 's') teclas.down  = false;
-  if(k === 'arrowleft'  || k === 'a') teclas.left  = false;
-  if(k === 'arrowright' || k === 'd') teclas.right = false;
-});
-
-document.querySelectorAll('.dpad button').forEach(btn => {
-  const dir = btn.dataset.dir;
-  const setOn  = e => { e.preventDefault(); teclas[dir] = true;  };
-  const setOff = e => { e.preventDefault(); teclas[dir] = false; };
-  btn.addEventListener('touchstart',  setOn,  { passive:false });
-  btn.addEventListener('touchend',    setOff, { passive:false });
-  btn.addEventListener('touchcancel', setOff, { passive:false });
-  btn.addEventListener('mousedown',   setOn);
-  btn.addEventListener('mouseup',     setOff);
-  btn.addEventListener('mouseleave',  setOff);
-});
-
-const acaoBtn = document.getElementById('acaoBtn');
-if(acaoBtn){
-  acaoBtn.addEventListener('touchstart', e => { e.preventDefault(); tentarSeduzir(); }, { passive:false });
-  acaoBtn.addEventListener('mousedown',  e => { e.preventDefault(); tentarSeduzir(); });
-}
-
-c.addEventListener('click', () => { if(!IS_MOBILE) tentarSeduzir(); });
-</script>
-</body>
-</html>
-<!-- BUFFER zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz -->

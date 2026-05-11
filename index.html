@@ -376,50 +376,6 @@ footer{
   .destaque-emoji{ font-size:48px; }
 }
 
-/* Seletor de dificuldade */
-.dif-wrap{
-  margin-top:50px;
-  text-align:center;
-  position:relative;
-  z-index:5;
-}
-.dif-label{
-  display:block;
-  font-family:'Cinzel',serif;
-  font-size:12px;
-  letter-spacing:4px;
-  color:var(--dourado);
-  margin-bottom:14px;
-  text-transform:uppercase;
-}
-.dif-buttons{
-  display:inline-flex;
-  gap:8px;
-  background:rgba(2,6,23,0.5);
-  padding:6px;
-  border-radius:30px;
-  border:1px solid rgba(34,197,94,0.25);
-}
-.dif-buttons button{
-  background:transparent;
-  border:none;
-  color:#86efac;
-  padding:10px 22px;
-  border-radius:24px;
-  font-family:'Inter',sans-serif;
-  font-size:13px;
-  font-weight:600;
-  letter-spacing:1px;
-  cursor:pointer;
-  transition:all 0.2s;
-}
-.dif-buttons button:hover{ background:rgba(34,197,94,0.15); }
-.dif-buttons button.ativo{
-  background:linear-gradient(90deg,#16a34a,var(--verde-claro));
-  color:white;
-  box-shadow:0 4px 14px -4px rgba(34,197,94,0.6);
-}
-
 /* === OTIMIZACAO MOBILE === */
 @media (max-width: 900px), (pointer: coarse){
   /* backdrop-filter custa muito em GPU mobile */
@@ -523,26 +479,6 @@ footer{
       <div class="btn">Jogar</div>
     </div>
 
-    <div class="card" onclick="ir('mula')">
-      <div class="card-header">
-        <div class="card-emoji" style="color:#fb923c">🔥</div>
-        <span class="tag medio">Médio</span>
-      </div>
-      <h3>Mula-sem-cabeça</h3>
-      <p>Endless runner. Pule as cruzes, colete chamas e corra o máximo que puder.</p>
-      <div class="btn">Jogar</div>
-    </div>
-
-  </div>
-
-  <!-- SELETOR DE DIFICULDADE GLOBAL -->
-  <div class="dif-wrap">
-    <span class="dif-label">DIFICULDADE</span>
-    <div class="dif-buttons" id="difButtons">
-      <button data-dif="facil">Fácil</button>
-      <button data-dif="medio">Médio</button>
-      <button data-dif="dificil">Difícil</button>
-    </div>
   </div>
 
 </div>
@@ -555,25 +491,6 @@ function ir(jogo){
   document.body.style.opacity = "0";
   setTimeout(()=>{ window.location.href = jogo + ".html"; }, 250);
 }
-
-// ===== SELETOR DE DIFICULDADE =====
-(function(){
-  const KEY = 'amazonia.dif';
-  const atual = () => localStorage.getItem(KEY) || 'medio';
-  function refresh(){
-    const cur = atual();
-    document.querySelectorAll('#difButtons button').forEach(b => {
-      b.classList.toggle('ativo', b.dataset.dif === cur);
-    });
-  }
-  document.querySelectorAll('#difButtons button').forEach(b => {
-    b.addEventListener('click', () => {
-      localStorage.setItem(KEY, b.dataset.dif);
-      refresh();
-    });
-  });
-  refresh();
-})();
 
 // Partículas: folhas caindo (reduzidas em mobile para economizar bateria/CPU)
 const particles = document.getElementById("particles");
@@ -594,70 +511,3 @@ for(let i=0; i<QTD_FOLHAS; i++){
 
 </body>
 </html>
-d-emoji" style="color:#fb923c">🔥</div>
-        <span class="tag medio">Médio</span>
-      </div>
-      <h3>Mula-sem-cabeça</h3>
-      <p>Endless runner. Pule as cruzes, colete chamas e corra o máximo que puder.</p>
-      <div class="btn">Jogar</div>
-    </div>
-
-  </div>
-
-  <div class="dif-wrap">
-    <span class="dif-label">DIFICULDADE</span>
-    <div class="dif-buttons" id="difButtons">
-      <button data-dif="facil">Fácil</button>
-      <button data-dif="medio">Médio</button>
-      <button data-dif="dificil">Difícil</button>
-    </div>
-  </div>
-
-</div>
-
-<footer>FEITO COM 🌱 · INSPIRADO NAS LENDAS DA AMAZÔNIA</footer>
-
-<script>
-function ir(jogo){
-  document.body.style.transition = "opacity 0.3s";
-  document.body.style.opacity = "0";
-  setTimeout(()=>{ window.location.href = jogo + ".html"; }, 250);
-}
-
-(function(){
-  const KEY = 'amazonia.dif';
-  const atual = () => localStorage.getItem(KEY) || 'medio';
-  function refresh(){
-    const cur = atual();
-    document.querySelectorAll('#difButtons button').forEach(b => {
-      b.classList.toggle('ativo', b.dataset.dif === cur);
-    });
-  }
-  document.querySelectorAll('#difButtons button').forEach(b => {
-    b.addEventListener('click', () => {
-      localStorage.setItem(KEY, b.dataset.dif);
-      refresh();
-    });
-  });
-  refresh();
-})();
-
-const particles = document.getElementById("particles");
-const leaves = ["🍃","🌿","🍂"];
-const IS_MOBILE_M = window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
-const QTD = IS_MOBILE_M ? 6 : 18;
-for(let i=0; i<QTD; i++){
-  const leaf = document.createElement("div");
-  leaf.className = "leaf";
-  leaf.textContent = leaves[Math.floor(Math.random()*leaves.length)];
-  leaf.style.left = Math.random()*100 + "%";
-  leaf.style.animationDuration = (8 + Math.random()*10) + "s";
-  leaf.style.animationDelay = Math.random()*10 + "s";
-  leaf.style.fontSize = (12 + Math.random()*16) + "px";
-  particles.appendChild(leaf);
-}
-</script>
-
-</body>
-</html>
-<!-- PAD: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz -->

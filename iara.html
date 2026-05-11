@@ -484,17 +484,6 @@ if(IS_MOBILE){
   Object.defineProperty(ctx,'shadowColor',{get:()=>_sc,set:v=>{_sc='transparent';}});
 }
 
-// ===== DIFICULDADE (Iara ja tem audio proprio) =====
-const DIF = (() => {
-  const get = () => localStorage.getItem('amazonia.dif') || 'medio';
-  const MULT = {
-    facil:   { vel:0.75, hp:1.5, spawn:0.7, premio:1.2 },
-    medio:   { vel:1.0,  hp:1.0, spawn:1.0, premio:1.0 },
-    dificil: { vel:1.3,  hp:0.7, spawn:1.4, premio:0.85 }
-  };
-  return { get, mult: () => MULT[get()] || MULT.medio };
-})();
-
 let notes = [];
 let score = 0;
 let vidas = 5;
@@ -528,8 +517,7 @@ function reset(){
   if(!muted){ audio.play().catch(()=>{}); }
   // limpar timers e relançar
   if(spawnInterval) clearInterval(spawnInterval);
-  const _spawnMs = Math.round(700 / DIF.mult().spawn);
-  spawnInterval = setInterval(spawn, _spawnMs);
+  spawnInterval = setInterval(spawn,700);
   if(tempoInterval) clearInterval(tempoInterval);
   tempoInterval = setInterval(tickTempo, 1000);
 }
@@ -956,21 +944,3 @@ for(let i=0; i<20; i++){
 
 </body>
 </html>
-ve:false});
-
-const bubbles = document.getElementById("bubbles");
-for(let i=0; i<20; i++){
-  const b = document.createElement("div");
-  b.className = "bubble";
-  const size = 8 + Math.random()*30;
-  b.style.width = size+"px";
-  b.style.height = size+"px";
-  b.style.left = Math.random()*100+"%";
-  b.style.animationDuration = (8 + Math.random()*10)+"s";
-  b.style.animationDelay = Math.random()*8+"s";
-  bubbles.appendChild(b);
-}
-</script>
-</body>
-</html>
-<!-- BUFFER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
