@@ -599,9 +599,8 @@ function comprimentoTrilha(){
 }
 
 // ===== START / RESET =====
-function start(){
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("game").style.display = "block";
+function reset(){
+  // resize garante que trilha use w/h corretos
   resize();
   construirTrilha();
   onda = 1;
@@ -617,12 +616,18 @@ function start(){
   document.getElementById("sementes").innerText = sementes;
   document.getElementById("vidas").innerText = vidas;
   document.getElementById("overlay").classList.remove("show");
-  document.getElementById("btnOnda").style.display = "block";
-  document.getElementById("btnOnda").classList.add("pulse");
+  const bo = document.getElementById("btnOnda");
+  bo.style.display = "block";
+  bo.classList.add("pulse");
   atualizarPainelArm();
+}
+function start(){
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  reset();
   if(!rodando){ rodando = true; loop(); }
 }
-function reiniciar(){ start(); }
+function reiniciar(){ reset(); }
 function voltar(){ window.location.href = "index.html"; }
 
 // ===== PAINEL DE ARMADILHAS =====
@@ -1152,8 +1157,6 @@ for(let i=0;i<15;i++){
   f.style.fontSize = (12 + Math.random()*16) + "px";
   ff.appendChild(f);
 }
-
-resize();
 </script>
 
 </body>

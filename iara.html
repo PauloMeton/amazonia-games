@@ -208,18 +208,93 @@ h1.titulo{
   min-height:100vh;
 }
 
+.hud-row{
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:center;
+}
 .hud{
   font-family:'Cinzel',serif;
-  font-size:22px;
-  letter-spacing:2px;
+  font-size:16px;
+  letter-spacing:1.5px;
   color:var(--ciano);
-  margin-bottom:14px;
-  padding:8px 24px;
+  padding:7px 16px;
   background:rgba(2,6,23,0.6);
   backdrop-filter:blur(8px);
   border:1px solid rgba(34,211,238,0.4);
   border-radius:30px;
+  white-space:nowrap;
 }
+.hud.vidas-hud{ color:#fca5a5; border-color:rgba(239,68,68,0.4); }
+.hud.tempo-hud{ color:#fde047; border-color:rgba(250,204,21,0.4); }
+.hud.vidas-hud.dano{ animation:hpPulse 0.3s ease; }
+@keyframes hpPulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.18); background:rgba(220,38,38,0.5); }
+}
+.mute-btn{
+  width:36px; height:36px;
+  border-radius:50%;
+  background:rgba(2,6,23,0.6);
+  border:1px solid rgba(34,211,238,0.4);
+  color:#a5f3fc;
+  font-size:16px;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.mute-btn:active{ transform:scale(0.92); }
+
+/* OVERLAY GAME OVER */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,0.88);
+  backdrop-filter:blur(8px);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:100;
+  color:white;
+  text-align:center;
+  padding:20px;
+  animation:overlayIn 0.4s ease;
+}
+.overlay.show{ display:flex; }
+@keyframes overlayIn{
+  from{ opacity:0; }
+  to{ opacity:1; }
+}
+.overlay h2{
+  font-family:'Cinzel',serif;
+  font-size:34px;
+  margin:10px;
+  background:linear-gradient(90deg,#a5f3fc,#22d3ee);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.overlay p{ color:#bae6fd; margin-bottom:10px; font-size:15px; }
+.overlay button{
+  margin:8px;
+  padding:14px 28px;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,#0ea5e9,var(--ciano));
+  border:none;
+  border-radius:12px;
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 20px -5px rgba(34,211,238,0.6);
+  transition:transform 0.2s;
+}
+.overlay button:hover{ transform:translateY(-2px); }
 
 canvas{
   background:linear-gradient(180deg,#022c43,#0ea5e9);
@@ -366,7 +441,12 @@ canvas{
 
 <!-- JOGO -->
 <div id="game">
-  <div class="hud">PONTOS · <span id="score">0</span></div>
+  <div class="hud-row">
+    <div class="hud">PONTOS · <span id="score">0</span></div>
+    <div class="hud vidas-hud">VIDAS · <span id="vidas">5</span></div>
+    <div class="hud tempo-hud">⏱ <span id="tempo">90</span>s</div>
+    <button class="mute-btn" id="muteBtn" type="button" title="Mudo">🔊</button>
+  </div>
   <canvas id="canvas" width="560" height="780"></canvas>
 
   <div class="lane-buttons">
@@ -378,6 +458,15 @@ canvas{
 </div>
 
 <div id="feedback" class="feedback"></div>
+
+<!-- OVERLAY GAME OVER -->
+<div id="overlay" class="overlay">
+  <h2 id="goTitle">🌊 Você foi encantado!</h2>
+  <p id="goMsg">A Iara te levou pro fundo do rio.</p>
+  <p>Pontuação final: <span id="finalScore">0</span></p>
+  <button onclick="reiniciar()">🔄 Tentar de novo</button>
+  <button onclick="voltar()">← Menu</button>
+</div>
 
 <script>
 // 🎵 MÚSICA
@@ -397,38 +486,112 @@ if(IS_MOBILE){
 
 let notes = [];
 let score = 0;
+let vidas = 5;
+let tempoRestante = 90;          // segundos para vencer
+let tempoInterval = null;
 let lanes = [112,224,336,448];   // canvas 560 de largura
 let spawnInterval = null;
 let running = false;
 let tick = 0;
+let gameOver = false;
+let vitoria = false;
+let muted = false;
+const MAX_VIDAS = 5;
+const TEMPO_INICIAL = 90;
 const NOTE_SPEED = 9;             // velocidade ajustada ao novo canvas
 const HIT_LINE = 660;             // posição vertical da linha de acerto
+
+function reset(){
+  notes = [];
+  score = 0;
+  vidas = MAX_VIDAS;
+  tempoRestante = TEMPO_INICIAL;
+  gameOver = false;
+  vitoria = false;
+  tick = 0;
+  document.getElementById("score").innerText = score;
+  document.getElementById("vidas").innerText = vidas;
+  document.getElementById("tempo").innerText = tempoRestante;
+  document.getElementById("overlay").classList.remove("show");
+  audio.currentTime = 0;
+  if(!muted){ audio.play().catch(()=>{}); }
+  // limpar timers e relançar
+  if(spawnInterval) clearInterval(spawnInterval);
+  spawnInterval = setInterval(spawn,700);
+  if(tempoInterval) clearInterval(tempoInterval);
+  tempoInterval = setInterval(tickTempo, 1000);
+}
+
+function reiniciar(){ reset(); }
 
 function start(){
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="flex";
-
-  notes = [];
-  score = 0;
-  document.getElementById("score").innerText = score;
-
-  audio.currentTime = 0;
-  audio.play().catch(()=>{});
-
-  if(spawnInterval) clearInterval(spawnInterval);
-  spawnInterval = setInterval(spawn,700);
-
+  reset();
   if(!running){
     running = true;
     draw();
   }
 }
 
+function tickTempo(){
+  if(gameOver || vitoria) return;
+  tempoRestante--;
+  document.getElementById("tempo").innerText = tempoRestante;
+  if(tempoRestante <= 0){
+    vencer();
+  }
+}
+
+function perderJogo(){
+  if(gameOver || vitoria) return;
+  gameOver = true;
+  if(spawnInterval){ clearInterval(spawnInterval); spawnInterval = null; }
+  if(tempoInterval){ clearInterval(tempoInterval); tempoInterval = null; }
+  audio.pause();
+  document.getElementById("goTitle").innerText = "🌊 Você foi encantado!";
+  document.getElementById("goMsg").innerText = "A Iara te levou pro fundo do rio.";
+  document.getElementById("finalScore").innerText = score;
+  document.getElementById("overlay").classList.add("show");
+}
+
+function vencer(){
+  if(gameOver || vitoria) return;
+  vitoria = true;
+  if(spawnInterval){ clearInterval(spawnInterval); spawnInterval = null; }
+  if(tempoInterval){ clearInterval(tempoInterval); tempoInterval = null; }
+  audio.pause();
+  document.getElementById("goTitle").innerText = "🌊 Você resistiu ao canto!";
+  document.getElementById("goMsg").innerText = "A Iara desapareceu nas águas. Você sobreviveu!";
+  document.getElementById("finalScore").innerText = score;
+  document.getElementById("overlay").classList.add("show");
+}
+
+function perderVida(){
+  if(gameOver || vitoria) return;
+  vidas--;
+  const vEl = document.getElementById("vidas");
+  vEl.innerText = vidas;
+  const hp = vEl.parentNode;
+  hp.classList.remove("dano");
+  void hp.offsetWidth;
+  hp.classList.add("dano");
+  if(vidas <= 0){ perderJogo(); }
+}
+
 function voltar(){
   audio.pause();
   audio.currentTime = 0;
   if(spawnInterval){ clearInterval(spawnInterval); spawnInterval = null; }
+  if(tempoInterval){ clearInterval(tempoInterval); tempoInterval = null; }
   window.location.href = "index.html";
+}
+
+function toggleMute(){
+  muted = !muted;
+  audio.muted = muted;
+  const btn = document.getElementById("muteBtn");
+  btn.innerText = muted ? "🔇" : "🔊";
 }
 
 function spawn(){
@@ -694,12 +857,15 @@ function draw(){
   // Notas como gotas de água
   for(let i = notes.length - 1; i >= 0; i--){
     let n = notes[i];
-    n.y += NOTE_SPEED;
+    if(!gameOver && !vitoria){ n.y += NOTE_SPEED; }
     drawNote(n.x, n.y);
 
     if(n.y > 780){
       notes.splice(i,1);
-      show("MISS","#fca5a5");
+      if(!gameOver && !vitoria){
+        show("MISS","#fca5a5");
+        perderVida();
+      }
     }
   }
 
@@ -717,6 +883,7 @@ function show(text,color){
 }
 
 function hit(laneIndex){
+  if(gameOver || vitoria) return;
   let target = lanes[laneIndex];
   let acertou = false;
 
@@ -754,6 +921,11 @@ document.querySelectorAll(".lane-buttons button").forEach(btn=>{
   btn.addEventListener("touchstart", e=>{ e.preventDefault(); hit(lane); }, {passive:false});
   btn.addEventListener("click", ()=>hit(lane));
 });
+
+document.getElementById("muteBtn").addEventListener("click", toggleMute);
+document.getElementById("muteBtn").addEventListener("touchstart", e=>{
+  e.preventDefault(); toggleMute();
+}, {passive:false});
 
 // BOLHAS
 const bubbles = document.getElementById("bubbles");
