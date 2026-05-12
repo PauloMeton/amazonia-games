@@ -10,16 +10,16 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
   <!-- Componentes customizados -->
-  <script src="js/components/gaze-cursor.js"></script>
-  <script src="js/components/enemy-base.js"></script>
-  <script src="js/components/corruption-spot.js"></script>
-  <script src="js/components/totem.js"></script>
-  <script src="js/components/portal.js"></script>
-  <script src="js/components/great-tree.js"></script>
-  <script src="js/components/paje.js"></script>
-  <script src="js/components/spirits.js"></script>
-  <script src="js/components/ambient-audio.js"></script>
-  <script src="js/components/hub-manager.js"></script>
+  <script src="gaze-cursor.js"></script>
+  <script src="enemy-base.js"></script>
+  <script src="corruption-spot.js"></script>
+  <script src="totem.js"></script>
+  <script src="portal.js"></script>
+  <script src="great-tree.js"></script>
+  <script src="paje.js"></script>
+  <script src="spirits.js"></script>
+  <script src="ambient-audio.js"></script>
+  <script src="hub-manager.js"></script>
 
   <style>
     body { margin: 0; background: #000; overflow: hidden; }
@@ -28,16 +28,26 @@
       background: radial-gradient(ellipse at center, #1B4332 0%, #000 100%);
       color: #A8E6CF; display: flex; flex-direction: column;
       align-items: center; justify-content: center; font-family: serif;
-      z-index: 9999; transition: opacity 1s;
+      z-index: 2147483647; transition: opacity 1s;
+      pointer-events: auto;
+      touch-action: manipulation;
+      padding: 20px;
+      text-align: center;
     }
     #loader h1 { font-size: 2em; margin: 0; letter-spacing: 0.1em; }
     #loader p  { font-style: italic; opacity: 0.7; margin-top: 1em; }
     #start-btn {
-      margin-top: 2em; padding: 1em 2em; background: transparent;
+      margin-top: 2em; padding: 1.2em 2em; background: #1B4332;
       border: 2px solid #A8E6CF; color: #A8E6CF; font-size: 1.1em;
       cursor: pointer; letter-spacing: 0.1em;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(168,230,207,0.4);
+      position: relative; z-index: 2;
+      min-width: 80%;
     }
-    #start-btn:hover { background: #A8E6CF; color: #1B4332; }
+    #start-btn:active { background: #A8E6CF; color: #1B4332; }
+    #start-btn:hover  { background: #A8E6CF; color: #1B4332; }
   </style>
 </head>
 <body>
@@ -183,7 +193,8 @@
 
   <script>
     // Esconde loader e desbloqueia áudio do navegador
-    document.getElementById('start-btn').addEventListener('click', () => {
+    function startGame(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       const scene = document.querySelector('a-scene');
       // Garante que o scene esteja carregado antes de esconder o loader
       const hideLoader = () => {
@@ -210,16 +221,24 @@
 
       // Mensagem de boas-vindas
       setTimeout(() => {
-        const scene = document.querySelector('a-scene');
-        scene.emit('hub-message', {
+        const sc = document.querySelector('a-scene');
+        if (sc) sc.emit('hub-message', {
           text: 'Você chegou ao Coração da Mata. Olhe ao redor.'
         });
       }, 1500);
-    });
+    }
+
+    // Liga o botão a múltiplos eventos (touch + click) para mobile
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) {
+      startBtn.addEventListener('click', startGame);
+      startBtn.addEventListener('touchend', function(e){ startGame(e); });
+    }
 
     // Cria anel decorativo de árvores menores
-    window.addEventListener('load', () => {
+    window.addEventListener('load', function () {
       const ring = document.getElementById('forest-ring');
+      if (!ring) return;
       const trees = 24;
       for (let i = 0; i < trees; i++) {
         const a = (i / trees) * Math.PI * 2;
@@ -232,7 +251,7 @@
         trunk.setAttribute('radius', 0.25);
         trunk.setAttribute('height', h);
         trunk.setAttribute('segments-radial', 5);
-        trunk.setAttribute('position', `${x} ${h/2} ${z}`);
+        trunk.setAttribute('position', x + ' ' + (h/2) + ' ' + z);
         trunk.setAttribute('color', '#3E2723');
         ring.appendChild(trunk);
 
@@ -241,7 +260,7 @@
         top.setAttribute('radius-top', 0.1);
         top.setAttribute('height', 2.5);
         top.setAttribute('segments-radial', 6);
-        top.setAttribute('position', `${x} ${h + 1} ${z}`);
+        top.setAttribute('position', x + ' ' + (h + 1) + ' ' + z);
         const shades = ['#1F4020', '#2E5D31', '#3F7042', '#264C28'];
         top.setAttribute('color', shades[i % shades.length]);
         top.setAttribute('material', 'flatShading: true');
@@ -249,15 +268,15 @@
       }
     });
 
-    // Atualiza barra de energia ao receber evento do totem
-    document.querySelector('a-scene').addEventListener('totem-energy', (e) => {
+    // Atualiza barra de energia
+    document.querySelector('a-scene').addEventListener('totem-energy', function (e) {
       const bar = document.getElementById('energy-bar');
       if (!bar) return;
       const pct = e.detail.value / e.detail.max;
       bar.setAttribute('width', 0.4 * pct);
-      bar.setAttribute('position', `${-0.2 + (0.4 * pct) / 2} 0 0.001`);
+      bar.setAttribute('position', (-0.2 + (0.4 * pct) / 2) + ' 0 0.001');
       const color = pct > 0.5 ? '#7FFFD4' : pct > 0.2 ? '#FFD700' : '#FF6B6B';
-      bar.setAttribute('material', `color: ${color}; shader: flat`);
+      bar.setAttribute('material', 'color: ' + color + '; shader: flat');
     });
   </script>
 </body>
