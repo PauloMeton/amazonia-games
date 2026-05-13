@@ -83,24 +83,18 @@
   <!-- ===== CENA 3D ===== -->
   <a-scene
     id="main-scene"
-    fog="type: linear; color: #1A2540; near: 25; far: 70"
+    fog="type: linear; color: #6B9A6B; near: 30; far: 80"
     renderer="antialias: true; colorManagement: true"
     vr-mode-ui="enabled: true; cardboardModeEnabled: true"
     hub-manager
     ambient-audio="biome: forest; volume: 0.22">
 
-    <!-- Céu noturno (azul profundo, não totalmente preto) -->
-    <a-sky color="#0F1838"></a-sky>
+    <!-- Céu claro (teste de visibilidade — depois escurecemos) -->
+    <a-sky color="#87A878"></a-sky>
 
-    <!-- Lua grande e brilhante (mais perto pra ser visível) -->
-    <a-sphere position="-8 15 -18" radius="3" color="#FFFAEB"
-              material="emissive: #FFFAEB; emissiveIntensity: 0.9; shader: flat"></a-sphere>
-    <a-sphere position="-8 15 -18" radius="4.5"
-              material="color: #FFFAEB; opacity: 0.25; transparent: true; shader: flat"></a-sphere>
-    <a-sphere position="-8 15 -18" radius="6"
-              material="color: #FFFAEB; opacity: 0.08; transparent: true; shader: flat"></a-sphere>
-    <!-- Luz da lua iluminando a cena -->
-    <a-light type="point" position="-8 15 -18" color="#E8E8FF" intensity="1.2" distance="80"></a-light>
+    <!-- Sol brilhante -->
+    <a-sphere position="-8 15 -18" radius="3" color="#FFE082"
+              material="emissive: #FFE082; emissiveIntensity: 1; shader: flat"></a-sphere>
 
     <!-- Estrelas (gerated por JS no final) -->
     <a-entity id="stars"></a-entity>
@@ -112,10 +106,10 @@
     <a-entity id="forest-ring"></a-entity>
     <a-entity forest-atmosphere="radius: 32; minDist: 4; density: 2"></a-entity>
 
-    <!-- Iluminação NOTURNA (azulada de luar) — bem mais clara que antes -->
-    <a-light type="ambient" color="#7090C0" intensity="0.6"></a-light>
-    <a-light type="directional" color="#B0C8E8" intensity="0.8" position="-8 15 -18"></a-light>
-    <a-light type="hemisphere" color="#7090C0" groundColor="#1A2A1A" intensity="0.5"></a-light>
+    <!-- Iluminação CLARA (teste) -->
+    <a-light type="ambient" color="#FFFFFF" intensity="1.2"></a-light>
+    <a-light type="directional" color="#FFF8DC" intensity="1.0" position="5 10 5"></a-light>
+    <a-light type="hemisphere" color="#FFFFFF" groundColor="#3D6B3F" intensity="0.6"></a-light>
 
     <!-- Árvore central (Coração da Mata) -->
     <a-entity great-tree position="0 0 0"></a-entity>
@@ -131,8 +125,12 @@
     <!-- CUCA (substitui o Pajé) -->
     <a-entity cuca position="-3 0 -2" rotation="0 30 0" scale="0.95 0.95 0.95"></a-entity>
 
-    <!-- TOTEM ANCESTRAL (estátua decorativa próxima à árvore) -->
-    <a-entity totem-statue position="3 0 -1" rotation="0 -30 0"></a-entity>
+    <!-- TOTEM ANCESTRAL — comentado temporariamente para testar -->
+    <!-- <a-entity totem-statue position="3 0 -1" rotation="0 -30 0"></a-entity> -->
+
+    <!-- Marcador simples no lugar do totem-statue (cilindro azul de teste) -->
+    <a-cylinder position="3 1.5 -1" radius="0.3" height="3" color="#FF6B35"
+                material="emissive: #FF6B35; emissiveIntensity: 0.5"></a-cylinder>
 
     <!-- 5 PORTAIS -->
     <a-entity portal="destination: mata-viva; color: #52A256; label: Mata Viva"
