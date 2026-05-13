@@ -4,25 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#1B4332">
-  <title>Amazônia: Ecos do Vazio — Coração da Mata</title>
+  <title>Amazônia: Ecos do Vazio</title>
 
-  <!-- ENGINE A-Frame (motor 3D/VR) -->
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-  <!-- COMPONENTES DO JOGO (todos os arquivos JS na mesma pasta) -->
+  <!-- Componentes (só os essenciais) -->
   <script src="gaze-cursor.js"></script>
-  <script src="enemy-base.js"></script>
-  <script src="corruption-spot.js"></script>
   <script src="totem.js"></script>
   <script src="portal.js"></script>
   <script src="great-tree.js"></script>
-  <script src="paje.js"></script>
   <script src="cuca.js"></script>
-  <script src="totem-statue.js"></script>
-  <script src="spirits.js"></script>
-  <script src="ambient-audio.js"></script>
-  <script src="hub-manager.js"></script>
-  <script src="forest-atmosphere.js"></script>
   <script src="walk-controls.js"></script>
 
   <style>
@@ -53,16 +45,8 @@
       border-radius: 50%; cursor: pointer; z-index: 9998;
       display: none; align-items: center; justify-content: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      -webkit-tap-highlight-color: rgba(168,230,207,0.4);
     }
     #my-vr-btn:active { background: #A8E6CF; color: #1B4332; }
-    #vr-help {
-      position: fixed; bottom: 12px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7); color: #A8E6CF;
-      padding: 8px 16px; border-radius: 20px;
-      font-size: 0.85em; z-index: 9997; display: none;
-    }
   </style>
 </head>
 <body>
@@ -78,59 +62,26 @@
   </div>
 
   <button id="my-vr-btn" title="Entrar em modo VR">VR</button>
-  <div id="vr-help">Toque no VR e encaixe o celular no Cardboard</div>
 
-  <!-- ===== CENA 3D ===== -->
   <a-scene
     id="main-scene"
-    fog="type: linear; color: #6B9A6B; near: 30; far: 80"
+    fog="type: linear; color: #6B9A6B; near: 25; far: 70"
     renderer="antialias: true; colorManagement: true"
-    vr-mode-ui="enabled: true; cardboardModeEnabled: true"
-    hub-manager
-    ambient-audio="biome: forest; volume: 0.22">
+    vr-mode-ui="enabled: true; cardboardModeEnabled: true">
 
-    <!-- Céu claro (teste de visibilidade — depois escurecemos) -->
     <a-sky color="#87A878"></a-sky>
+    <a-circle radius="40" rotation="-90 0 0" color="#3D6B3F" material="shader: flat"></a-circle>
 
-    <!-- Sol brilhante -->
-    <a-sphere position="-8 15 -18" radius="3" color="#FFE082"
-              material="emissive: #FFE082; emissiveIntensity: 1; shader: flat"></a-sphere>
-
-    <!-- Estrelas (gerated por JS no final) -->
-    <a-entity id="stars"></a-entity>
-
-    <!-- Chão escuro -->
-    <a-circle radius="40" rotation="-90 0 0" color="#0F1F10" material="shader: flat"></a-circle>
-
-    <!-- Floresta densa -->
-    <a-entity id="forest-ring"></a-entity>
-    <a-entity forest-atmosphere="radius: 32; minDist: 4; density: 2"></a-entity>
-
-    <!-- Iluminação CLARA (teste) -->
+    <!-- Iluminação clara -->
     <a-light type="ambient" color="#FFFFFF" intensity="1.2"></a-light>
     <a-light type="directional" color="#FFF8DC" intensity="1.0" position="5 10 5"></a-light>
     <a-light type="hemisphere" color="#FFFFFF" groundColor="#3D6B3F" intensity="0.6"></a-light>
 
-    <!-- Árvore central (Coração da Mata) -->
+    <!-- Árvore central -->
     <a-entity great-tree position="0 0 0"></a-entity>
 
-    <!-- Espíritos flutuantes -->
-    <a-entity spirits="count: 10; radius: 14; color: #B0E0E6" position="0 0 0"></a-entity>
-
-    <!-- Focos de Vazio para treino -->
-    <a-entity corruption-spot position="5 0.01 3"></a-entity>
-    <a-entity corruption-spot position="-4 0.01 5" radius="0.5"></a-entity>
-    <a-entity corruption-spot position="6 0.01 -4" radius="0.7"></a-entity>
-
-    <!-- CUCA (substitui o Pajé) -->
+    <!-- CUCA -->
     <a-entity cuca position="-3 0 -2" rotation="0 30 0" scale="0.95 0.95 0.95"></a-entity>
-
-    <!-- TOTEM ANCESTRAL — comentado temporariamente para testar -->
-    <!-- <a-entity totem-statue position="3 0 -1" rotation="0 -30 0"></a-entity> -->
-
-    <!-- Marcador simples no lugar do totem-statue (cilindro azul de teste) -->
-    <a-cylinder position="3 1.5 -1" radius="0.3" height="3" color="#FF6B35"
-                material="emissive: #FF6B35; emissiveIntensity: 0.5"></a-cylinder>
 
     <!-- 5 PORTAIS -->
     <a-entity portal="destination: mata-viva; color: #52A256; label: Mata Viva"
@@ -144,133 +95,63 @@
     <a-entity portal="destination: vazio; color: #1A001F; label: O Vazio; locked: true"
               position="2.5 2.5 -7.6" rotation="0 -20 0"></a-entity>
 
-    <!-- Toast (mensagens narrativas) -->
-    <a-entity id="toast-anchor" position="0 1.5 -2">
-      <a-text id="toast" value="" align="center" color="#FFD700" width="3" visible="false"></a-text>
-    </a-entity>
+    <!-- Árvores menores ao redor (geradas no script abaixo) -->
+    <a-entity id="forest-ring"></a-entity>
 
-    <!-- HUD: barra de energia -->
-    <a-entity id="hud-energy" position="0.45 -0.35 -1">
-      <a-plane width="0.4" height="0.04" material="color: #333; opacity: 0.6; transparent: true; shader: flat"></a-plane>
-      <a-plane id="energy-bar" width="0.4" height="0.04" position="0 0 0.001"
-               material="color: #7FFFD4; shader: flat"></a-plane>
-    </a-entity>
-
-    <!-- ===== JOGADOR (com componente de andar) ===== -->
+    <!-- JOGADOR -->
     <a-entity id="rig" position="0 1.6 5" walk-controls="speed: 2; tiltAngle: 25">
-      <a-camera look-controls="reverseMouseDrag: false; touchEnabled: true"
-                wasd-controls-enabled="false">
-        <!-- Mira (cursor de olhar) -->
+      <a-camera look-controls="touchEnabled: true" wasd-controls-enabled="false">
         <a-entity gaze-cursor></a-entity>
-        <!-- Totem na "mão" (com lanterna iluminando o caminho) -->
         <a-entity totem position="0.32 -0.32 -0.6" rotation="-15 -10 0"></a-entity>
       </a-camera>
     </a-entity>
   </a-scene>
 
   <script>
-    // ========== INICIA O JOGO ==========
     function startGame(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       var loader = document.getElementById('loader');
       var vrBtn = document.getElementById('my-vr-btn');
-      var help = document.getElementById('vr-help');
-
       loader.style.opacity = '0';
       setTimeout(function () {
         loader.style.display = 'none';
         vrBtn.style.display = 'flex';
-        help.style.display = 'block';
-        setTimeout(function () { help.style.display = 'none'; }, 5000);
-
-        var sc = document.querySelector('a-scene');
-        if (sc) sc.emit('hub-message', { text: 'Olhe para baixo para andar. Olhe pra cima para parar.' });
       }, 800);
     }
-
-    // ========== ENTRA EM MODO VR ==========
     function enterVR() {
       var scene = document.getElementById('main-scene');
       if (!scene) return;
       try {
-        scene.enterVR().catch(function (err) {
-          alert('Modo VR não suportado: ' + err.message);
-        });
-      } catch (err) {
-        alert('Modo VR não disponível: ' + err.message);
-      }
+        scene.enterVR().catch(function (err) { alert('Modo VR não disponível: ' + err.message); });
+      } catch (err) { alert('Erro: ' + err.message); }
     }
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('start-btn').addEventListener('touchend', startGame);
+    document.getElementById('my-vr-btn').addEventListener('click', enterVR);
+    document.getElementById('my-vr-btn').addEventListener('touchend', function(e){ e.preventDefault(); enterVR(); });
 
-    // Liga os botões
-    var startBtn = document.getElementById('start-btn');
-    startBtn.addEventListener('click', startGame);
-    startBtn.addEventListener('touchend', startGame);
-
-    var vrBtn = document.getElementById('my-vr-btn');
-    vrBtn.addEventListener('click', enterVR);
-    vrBtn.addEventListener('touchend', function (e) { e.preventDefault(); enterVR(); });
-
-    // Estrelas no céu noturno
-    window.addEventListener('load', function () {
-      var stars = document.getElementById('stars');
-      if (stars) {
-        for (var s = 0; s < 200; s++) {
-          var star = document.createElement('a-sphere');
-          star.setAttribute('radius', 0.15 + Math.random() * 0.2);
-          // Distribui em uma cúpula (hemisfério acima do jogador)
-          var theta = Math.random() * Math.PI * 2;
-          var phi = Math.random() * Math.PI / 2.5;
-          var rDist = 90;
-          var sx = rDist * Math.cos(phi) * Math.cos(theta);
-          var sy = rDist * Math.sin(phi) + 5;
-          var sz = rDist * Math.cos(phi) * Math.sin(theta);
-          star.setAttribute('position', sx + ' ' + sy + ' ' + sz);
-          star.setAttribute('color', '#FFFFFF');
-          star.setAttribute('material', 'emissive: #FFFFFF; emissiveIntensity: 1; shader: flat');
-          // Piscadinha em algumas estrelas
-          if (Math.random() > 0.7) {
-            star.setAttribute('animation',
-              'property: material.opacity; from: 0.4; to: 1; dir: alternate; loop: true; dur: ' + (1500 + Math.random()*2500));
-          }
-          stars.appendChild(star);
-        }
-      }
-    });
-
-    // Anel de árvores menores
+    // Anel de árvores menores (gerado por JS)
     window.addEventListener('load', function () {
       var ring = document.getElementById('forest-ring');
       if (!ring) return;
-      for (var i = 0; i < 24; i++) {
-        var a = (i / 24) * Math.PI * 2;
-        var r = 18 + Math.random() * 6;
-        var x = Math.cos(a) * r;
-        var z = Math.sin(a) * r;
-        var h = 4 + Math.random() * 3;
-
+      for (var i = 0; i < 30; i++) {
+        var a = (i/30) * Math.PI * 2;
+        var r = 15 + Math.random()*6;
+        var x = Math.cos(a)*r;
+        var z = Math.sin(a)*r;
+        var h = 4 + Math.random()*3;
         var t = document.createElement('a-cylinder');
-        t.setAttribute('radius', 0.25); t.setAttribute('height', h); t.setAttribute('segments-radial', 5);
-        t.setAttribute('position', x + ' ' + (h / 2) + ' ' + z); t.setAttribute('color', '#3E2723');
+        t.setAttribute('radius', 0.3); t.setAttribute('height', h); t.setAttribute('segments-radial', 5);
+        t.setAttribute('position', x + ' ' + (h/2) + ' ' + z); t.setAttribute('color', '#3E2723');
         ring.appendChild(t);
-
-        var top = document.createElement('a-cone');
-        top.setAttribute('radius-bottom', 1.4); top.setAttribute('radius-top', 0.1);
-        top.setAttribute('height', 2.5); top.setAttribute('segments-radial', 6);
-        top.setAttribute('position', x + ' ' + (h + 1) + ' ' + z);
-        var sh = ['#1F4020', '#2E5D31', '#3F7042', '#264C28'];
-        top.setAttribute('color', sh[i % 4]); top.setAttribute('material', 'flatShading: true');
+        var top = document.createElement('a-sphere');
+        top.setAttribute('radius', 1.6); top.setAttribute('segments-width', 6); top.setAttribute('segments-height', 4);
+        top.setAttribute('position', x + ' ' + (h + 0.8) + ' ' + z);
+        var sh = ['#1F4020','#2E5D31','#3F7042','#264C28'];
+        top.setAttribute('color', sh[i%4]);
+        top.setAttribute('material', 'flatShading: true');
         ring.appendChild(top);
       }
-    });
-
-    // Atualiza barra de energia ao receber evento do totem
-    document.querySelector('a-scene').addEventListener('totem-energy', function (e) {
-      var bar = document.getElementById('energy-bar'); if (!bar) return;
-      var pct = e.detail.value / e.detail.max;
-      bar.setAttribute('width', 0.4 * pct);
-      bar.setAttribute('position', (-0.2 + (0.4 * pct) / 2) + ' 0 0.001');
-      var col = pct > 0.5 ? '#7FFFD4' : pct > 0.2 ? '#FFD700' : '#FF6B6B';
-      bar.setAttribute('material', 'color: ' + col + '; shader: flat');
     });
   </script>
 </body>
