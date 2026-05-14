@@ -1,26 +1,22 @@
 /* ============================================================================
-   WALK-CONTROLS.JS — MOVIMENTO DO JOGADOR
+   WALK-CONTROLS.JS — MOVIMENTO DO JOGADOR (versão corrigida)
    ============================================================================
    COMO FUNCIONA:
-   - No celular/VR: olha pra baixo (>= 25 graus) para ANDAR na direção que olha
-     olha pra frente/cima = PARA de andar (evita motion sickness)
-   - No desktop: usa WASD ou setas do teclado
-
-   POR QUE ASSIM:
-   No Cardboard você não tem joystick. A solução mais natural é usar
-   a inclinação da cabeça para iniciar/parar o movimento. Como o jogador
-   olha pra baixo pra "ver pra onde está pisando", isso funciona intuitivamente.
+   - VR/celular: olha pra BAIXO (>= 25°) para ANDAR na direção horizontal que olha
+   - Olha pra frente/cima = PARA de andar
+   - Desktop: WASD ou setas do teclado
    ============================================================================ */
 AFRAME.registerComponent('walk-controls', {
   schema: {
-    speed:       { type: 'number', default: 2.0 },   // metros por segundo
-    tiltAngle:   { type: 'number', default: 25 },    // ângulo mínimo pra começar a andar
-    maxDistance: { type: 'number', default: 35 }     // limite do mapa (não sai do círculo)
+    speed:       { type: 'number', default: 2.0 },
+    tiltAngle:   { type: 'number', default: 25 },
+    maxDistance: { type: 'number', default: 35 }
   },
 
   init: function () {
     this._dir = new THREE.Vector3();
-    this._keys = { w: false, a: false, s: false, d: false };
+    this._horiz = new THREE.Vector3();
+    this._keys = { w:false, a:false, s:false, d:false };
 
     var self = this;
     window.addEventListener('keydown', function (e) {
@@ -45,44 +41,43 @@ AFRAME.registerComponent('walk-controls', {
     var camera = this.el.sceneEl.camera;
     if (!camera) return;
 
-    // Pega direção que a câmera está olhando
+    // Direção que a câmera está olhando
     camera.getWorldDirection(this._dir);
-    // Pega o ângulo vertical (pitch) — em graus
-    var pitchRad = Math.asin(-this._dir.y);  // -y porque getWorldDirection aponta pra frente
-    var pitchDeg = pitchRad * 180 / Math.PI;
 
-    // No celular: anda quando olha pra baixo
-    var walkingByGaze = pitchDeg < -this.data.tiltAngle;
+    // Olhando pra BAIXO quando _dir.y < -sin(tiltAngle)
+    // (lookingDown = true significa que o jogador está olhando pra baixo o suficiente)
+    var lookingDown = this._dir.y < -Math.sin(this.data.tiltAngle * Math.PI / 180);
 
-    // Direção horizontal (ignora vertical)
-    var horiz = new THREE.Vector3(this._dir.x, 0, this._dir.z).normalize();
-    var move = new THREE.Vector3();
+    // Direção horizontal (zera o Y)
+    this._horiz.set(this._dir.x, 0, this._dir.z);
+    if (this._horiz.lengthSq() < 0.001) return;
+    this._horiz.normalize();
 
-    if (walkingByGaze) {
-      // Move na direção que olha (horizontal)
-      move.add(horiz.clone().multiplyScalar(this.data.speed * dt / 1000));
+    var step = this.data.speed * dt / 1000;
+    var dx = 0, dz = 0;
+
+    if (lookingDown) {
+      dx += this._horiz.x * step;
+      dz += this._horiz.z * step;
     }
 
-    // Desktop: WASD
-    if (this._keys.w) move.add(horiz.clone().multiplyScalar(this.data.speed * dt / 1000));
-    if (this._keys.s) move.add(horiz.clone().multiplyScalar(-this.data.speed * dt / 1000));
+    // WASD (desktop)
+    if (this._keys.w) { dx += this._horiz.x * step; dz += this._horiz.z * step; }
+    if (this._keys.s) { dx -= this._horiz.x * step; dz -= this._horiz.z * step; }
     if (this._keys.a || this._keys.d) {
-      var right = new THREE.Vector3(horiz.z, 0, -horiz.x);
-      if (this._keys.d) move.add(right.clone().multiplyScalar(this.data.speed * dt / 1000));
-      if (this._keys.a) move.add(right.clone().multiplyScalar(-this.data.speed * dt / 1000));
+      var rx = this._horiz.z, rz = -this._horiz.x;
+      if (this._keys.d) { dx += rx * step; dz += rz * step; }
+      if (this._keys.a) { dx -= rx * step; dz -= rz * step; }
     }
 
-    // Aplica movimento
-    if (move.lengthSq() > 0) {
-      var pos = rig.object3D.position;
-      var newX = pos.x + move.x;
-      var newZ = pos.z + move.z;
-      // Limita ao círculo do mapa
-      var distFromCenter = Math.sqrt(newX * newX + newZ * newZ);
-      if (distFromCenter < this.data.maxDistance) {
-        pos.x = newX;
-        pos.z = newZ;
-      }
+    if (dx === 0 && dz === 0) return;
+
+    var pos = rig.object3D.position;
+    var nx = pos.x + dx, nz = pos.z + dz;
+    var dist = Math.sqrt(nx * nx + nz * nz);
+    if (dist < this.data.maxDistance) {
+      pos.x = nx;
+      pos.z = nz;
     }
   }
 });
