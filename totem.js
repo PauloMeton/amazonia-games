@@ -135,10 +135,16 @@ AFRAME.registerComponent('totem', {
     var hits = this._raycaster.intersectObjects(objs, true);
     var hitEl = null;
     if (hits.length > 0) {
-      for (var j = 0; j < hits.length; j++) {
+      for (var j = 0; j < hits.length && !hitEl; j++) {
+        // Sobe na árvore Three.js até achar alguém com classe damageable
         var o = hits[j].object;
-        while (o && !o.el) o = o.parent;
-        if (o && o.el && o.el.classList.contains('damageable')) { hitEl = o.el; break; }
+        while (o) {
+          if (o.el && o.el.classList && o.el.classList.contains('damageable')) {
+            hitEl = o.el;
+            break;
+          }
+          o = o.parent;
+        }
       }
     }
     this._currentHit = hitEl;
