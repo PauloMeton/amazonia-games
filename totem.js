@@ -1,12 +1,5 @@
 /* ============================================================================
-   TOTEM.JS — TOTEM COM PURIFICAÇÃO AUTOMÁTICA POR OLHAR (gaze)
-   ============================================================================
-   Como funciona:
-   - Quando o jogador OLHA pra uma mancha de Vazio ou inimigo (damageable),
-     o feixe acende AUTOMATICAMENTE depois de 0.5s — sem precisar apertar botão
-   - Quando o jogador desvia o olhar, o feixe apaga
-   - Botões (clique/espaço/Cardboard) continuam funcionando como alternativa
-   - Energia drena enquanto dispara, regenera quando para
+   TOTEM.JS — Purificação automática por olhar + feixe pra frente
    ============================================================================ */
 AFRAME.registerComponent('totem', {
   schema: {
@@ -20,52 +13,42 @@ AFRAME.registerComponent('totem', {
     this._raycaster = new THREE.Raycaster();
     this._tmpVec = new THREE.Vector3();
     this._tmpDir = new THREE.Vector3();
-    this._gazingSince = 0;   // quanto tempo está olhando num alvo
-    this._currentHit = null; // alvo atual
+    this._currentHit = null;
 
-    // Corpo de madeira
     var body = document.createElement('a-cylinder');
-    body.setAttribute('radius', 0.06);
-    body.setAttribute('height', 0.4);
-    body.setAttribute('segments-radial', 6);
-    body.setAttribute('color', '#6B3410');
+    body.setAttribute('radius', 0.06); body.setAttribute('height', 0.4);
+    body.setAttribute('segments-radial', 6); body.setAttribute('color', '#6B3410');
     el.appendChild(body);
 
-    // Anel dourado
     var ring = document.createElement('a-torus');
-    ring.setAttribute('radius', 0.08);
-    ring.setAttribute('radius-tubular', 0.012);
-    ring.setAttribute('segments-radial', 6);
-    ring.setAttribute('segments-tubular', 12);
-    ring.setAttribute('position', '0 0.16 0');
-    ring.setAttribute('color', '#D4AF37');
+    ring.setAttribute('radius', 0.08); ring.setAttribute('radius-tubular', 0.012);
+    ring.setAttribute('segments-radial', 6); ring.setAttribute('segments-tubular', 12);
+    ring.setAttribute('position', '0 0.16 0'); ring.setAttribute('color', '#D4AF37');
     ring.setAttribute('material', 'emissive: #FFD700; emissiveIntensity: 0.8');
     el.appendChild(ring);
 
-    // Cristal turquesa
     var crystal = document.createElement('a-octahedron');
-    crystal.setAttribute('radius', 0.07);
-    crystal.setAttribute('position', '0 0.28 0');
+    crystal.setAttribute('radius', 0.07); crystal.setAttribute('position', '0 0.28 0');
     crystal.setAttribute('color', '#7FFFD4');
     crystal.setAttribute('material', 'emissive: #7FFFD4; emissiveIntensity: 1.2; opacity: 0.9; transparent: true');
     crystal.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear');
     el.appendChild(crystal);
     this.crystal = crystal;
 
-    // Halo perto do cristal
     var halo = document.createElement('a-light');
-    halo.setAttribute('type', 'point');
-    halo.setAttribute('color', '#7FFFD4');
-    halo.setAttribute('intensity', 0.9);
-    halo.setAttribute('distance', 4);
+    halo.setAttribute('type', 'point'); halo.setAttribute('color', '#7FFFD4');
+    halo.setAttribute('intensity', 1); halo.setAttribute('distance', 5);
     halo.setAttribute('position', '0 0.28 0');
     el.appendChild(halo);
+    this.halo = halo;
 
-    // Feixe (oculto até ativar)
+    // FEIXE: cilindro horizontal apontando pra frente do crystal
+    // (relativo ao totem: vai do crystal pra frente do jogador)
     var beam = document.createElement('a-cylinder');
-    beam.setAttribute('radius', 0.025);
-    beam.setAttribute('height', 8);
-    beam.setAttribute('position', '0 4.25 0');
+    beam.setAttribute('radius', 0.02);
+    beam.setAttribute('height', 15);  // 15m de alcance
+    beam.setAttribute('position', '0 0.28 -7.5'); // 7.5m à frente do crystal
+    beam.setAttribute('rotation', '90 0 0'); // deita o cilindro horizontalmente
     beam.setAttribute('color', '#7FFFD4');
     beam.setAttribute('material', 'emissive: #7FFFD4; emissiveIntensity: 1; opacity: 0.7; transparent: true; shader: flat');
     beam.setAttribute('visible', false);
@@ -73,14 +56,14 @@ AFRAME.registerComponent('totem', {
     this.beam = beam;
 
     this.beamActive = false;
-    this.manualFire = false;  // se está disparando por botão
+    this.manualFire = false;
     this.energy = this.data.energy;
     this._bindInputs();
   },
 
   _bindInputs: function () {
     var self = this;
-    var fire = function (on) { self.manualFire = on; self._updateBeam(); };
+    var fire = function (on) { self.manualFire = on; };
     window.addEventListener('mousedown', function () { fire(true); });
     window.addEventListener('mouseup',   function () { fire(false); });
     window.addEventListener('touchstart', function (e) { e.preventDefault(); fire(true); }, { passive: false });
@@ -89,23 +72,16 @@ AFRAME.registerComponent('totem', {
     window.addEventListener('keyup',   function (e) { if (e.code === 'Space') fire(false); });
   },
 
-  _updateBeam: function () {
-    // Beam liga se: tem energia E (está olhando num alvo OU está apertando botão)
+  tick: function (time, dt) {
+    this._updateGazeTarget();
+
     var shouldFire = this.energy > 0 && (this.manualFire || this._currentHit !== null);
     if (shouldFire !== this.beamActive) {
       this.beamActive = shouldFire;
       this.beam.setAttribute('visible', shouldFire);
+      this.halo.setAttribute('intensity', shouldFire ? 2 : 1);
     }
-  },
 
-  tick: function (time, dt) {
-    // Faz raycast da câmera pra ver se está olhando num alvo
-    this._updateGazeTarget();
-
-    // Atualiza estado do feixe
-    this._updateBeam();
-
-    // Gasta/regenera energia
     if (this.beamActive) {
       this.energy = Math.max(0, this.energy - (dt / 1000) * 8);
       if (this.energy <= 0) {
@@ -134,17 +110,14 @@ AFRAME.registerComponent('totem', {
     }
     var hits = this._raycaster.intersectObjects(objs, true);
     var hitEl = null;
-    if (hits.length > 0) {
-      for (var j = 0; j < hits.length && !hitEl; j++) {
-        // Sobe na árvore Three.js até achar alguém com classe damageable
-        var o = hits[j].object;
-        while (o) {
-          if (o.el && o.el.classList && o.el.classList.contains('damageable')) {
-            hitEl = o.el;
-            break;
-          }
-          o = o.parent;
+    for (var j = 0; j < hits.length && !hitEl; j++) {
+      var o = hits[j].object;
+      while (o) {
+        if (o.el && o.el.classList && o.el.classList.contains('damageable')) {
+          hitEl = o.el;
+          break;
         }
+        o = o.parent;
       }
     }
     this._currentHit = hitEl;
@@ -152,7 +125,7 @@ AFRAME.registerComponent('totem', {
 
   _damage: function (dt) {
     if (!this._currentHit) return;
-    var dmg = (dt / 1000) * 30 * (1 + this.data.powerLevel * 0.2);
+    var dmg = (dt / 1000) * 45 * (1 + this.data.powerLevel * 0.2); // 45 DPS (era 30)
     var comp = this._currentHit.components['enemy-base'] || this._currentHit.components['corruption-spot'];
     if (comp && typeof comp.takeDamage === 'function') {
       comp.takeDamage(dmg);
